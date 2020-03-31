@@ -28,24 +28,10 @@
     "compatibility": {
         "redcap-version-min": "9.3.5"
     },
-    "system-settings": [
-        {
-            "key": "protocol_no",
-            "name": "Protocol",
-            "type": "text",
-            "required": true
-        }
-    ],
     "project-settings": [
         {
-            "key": "appointment_duration",
-            "name": "Appointment duration (minutes)",
-            "type": "text",
-            "required": true
-        },
-        {
-            "key": "future_appointments",
-            "name": "Appointment generation interval (days)",
+            "key": "appointment_horizon",
+            "name": "How many days of appointments do you want to be available to the study respondents at all times? These appointment blocks will be automatically generated nightly",
             "type": "text",
             "required": true
         }
