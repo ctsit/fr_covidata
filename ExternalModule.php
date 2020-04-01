@@ -23,7 +23,7 @@ class ExternalModule extends AbstractExternalModule {
      * @inheritdoc.
      */
     function redcap_every_page_top($project_id) {
-        $this->create_future_appointments();
+
     }
 
     /**
@@ -44,14 +44,22 @@ class ExternalModule extends AbstractExternalModule {
         $test_sites = $query->execute();
         foreach ($test_sites as $test_site) {
             $data = $test_site->getData();
+            $project_id = $data['project_id'];
             $minute_interval = $data['site_appointment_duration'];
-            $open_time = "'" . $data['open_time'] . "'";
+            //$open_time = "'" . $data['open_time'] . "'";
+            $open_time = $data['open_time'];
             $close_time = ($data['close_time'] !== '00:00') ? $data['close_time'] : '23:59';
-            $close_time = "'$close_time'";
-            $horizon_days = 6;
+            //$close_time = "'$close_time'";
+            $horizon_days = $data['horizon_days'];
+            $closed_days = $data['closed_days'];
             $mults_needed = $horizon_days*(60/$minute_interval)*24;
+            $site_id = 1;
+            //$closed_days_line = (isset($closed_days)) ? "AND weekday(date) NOT IN (" . $closed_days . ")" : '';
 
-            $sql = "FLOOR(UNIX_TIMESTAMP(date)) AS appointment_block_date FROM (
+            $sql = "
+INSERT INTO redcap_entity_fr_appointment (created, updated, site, appointment_block_date, project_id)
+SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date)), $project_id
+                FROM (
                     SELECT (CURDATE() + 1 + INTERVAL c.number*$minute_interval MINUTE) AS date
                         FROM (SELECT singles + tens + hundreds number FROM 
                             ( SELECT 0 singles
@@ -73,43 +81,8 @@ class ExternalModule extends AbstractExternalModule {
                     WHERE c.number BETWEEN 0 AND $mults_needed
                 ) dates
                 WHERE date between now() and now() + INTERVAL $horizon_days DAY
-                AND weekday(date) NOT IN (1, 2)
-                AND TIME(date) between TIME($open_time) and TIME($close_time);";
-
-                //TODO: use generated days to fill in (non-existing) appointment blocks in fr_appointments
-
-                /* Non-PHP SQL
-SET @minute_interval = 15;
-SET @horizon_days = 6;
-SET @open_time = '07:00';
-SET @close_time = '11:59';
-SET @mults_needed = @horizon_days*(60/@minute_interval)*24;
-
-SELECT date, WEEKDAY(date), TIME(date) FROM (
-    SELECT (CURDATE() + 1 + INTERVAL c.number*@minute_interval MINUTE) AS date
-        FROM (SELECT singles + tens + hundreds number FROM 
-            ( SELECT 0 singles
-                UNION ALL SELECT   1 UNION ALL SELECT   2 UNION ALL SELECT   3
-                UNION ALL SELECT   4 UNION ALL SELECT   5 UNION ALL SELECT   6
-                UNION ALL SELECT   7 UNION ALL SELECT   8 UNION ALL SELECT   9
-            ) singles JOIN 
-            (SELECT 0 tens
-                UNION ALL SELECT  10 UNION ALL SELECT  20 UNION ALL SELECT  30
-                UNION ALL SELECT  40 UNION ALL SELECT  50 UNION ALL SELECT  60
-                UNION ALL SELECT  70 UNION ALL SELECT  80 UNION ALL SELECT  90
-            ) tens  JOIN 
-            (SELECT 0 hundreds
-                UNION ALL SELECT  100 UNION ALL SELECT  200 UNION ALL SELECT  300
-                UNION ALL SELECT  400 UNION ALL SELECT  500 UNION ALL SELECT  600
-                UNION ALL SELECT  700 UNION ALL SELECT  800 UNION ALL SELECT  900
-            ) hundreds
-        ORDER BY number DESC) c  
-    WHERE c.number BETWEEN 0 AND @mults_needed
-) dates
-WHERE date between now() and now() + INTERVAL @horizon_days DAY
-AND weekday(date) NOT IN (1, 2)
-AND TIME(date) between TIME(@open_time) and TIME(@close_time)
-                */
+                AND weekday(date) NOT IN (" . $closed_days . ")
+                AND TIME(date) between TIME('$open_time') and TIME('$close_time')";
 
 $result = $this->framework->query($sql);
         }
@@ -155,6 +128,24 @@ $result = $this->framework->query($sql);
                 ],
                 'close_time' => [
                     'name' => 'Close time',
+                    'type' => 'text',
+                ],
+                'closed_days' => [
+                    // Single day only supported until Entity gets update for multiselect
+                    'name' => 'Day this site is closed',
+                    'type' => 'text',
+                    'choices' => [
+                        '0' => 'Monday',
+                        '1' => 'Tuesday',
+                        '2' => 'Wednesday',
+                        '3' => 'Thursday',
+                        '4' => 'Friday',
+                        '5' => 'Saturday',
+                        '6' => 'Sunday',
+                    ]
+                ],
+                'horizon_days' => [
+                    'name' => 'Future days of appointments',
                     'type' => 'text',
                 ],
                 'project_id' => [
