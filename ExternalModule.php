@@ -23,7 +23,7 @@ class ExternalModule extends AbstractExternalModule {
      * @inheritdoc.
      */
     function redcap_every_page_top($project_id) {
-
+        $this->create_future_appointments();
     }
 
     /**
@@ -38,20 +38,82 @@ class ExternalModule extends AbstractExternalModule {
     }
 
 
-    /*
     private function create_future_appointments() {
         $factory = new EntityFactory();
-        foreach ($test_site) {
-            $data = [
-            'appointment_block_date' => '',
-            'site' => $test_site,
-            'record_id' => '',
-            'record_id_and_event' => ''
-            ];
-            $factory->create('fr_appointment', $data);
+        $query = $factory->query('test_site');
+        $test_sites = $query->execute();
+        foreach ($test_sites as $test_site) {
+            $data = $test_site->getData();
+            $minute_interval = $data['site_appointment_duration'];
+            $open_time = "'" . $data['open_time'] . "'";
+            $close_time = ($data['close_time'] !== '00:00') ? $data['close_time'] : '23:59';
+            $close_time = "'$close_time'";
+            $horizon_days = 6;
+            $mults_needed = $horizon_days*(60/$minute_interval)*24;
+
+            $sql = "FLOOR(UNIX_TIMESTAMP(date)) AS appointment_block_date FROM (
+                    SELECT (CURDATE() + 1 + INTERVAL c.number*$minute_interval MINUTE) AS date
+                        FROM (SELECT singles + tens + hundreds number FROM 
+                            ( SELECT 0 singles
+                                UNION ALL SELECT   1 UNION ALL SELECT   2 UNION ALL SELECT   3
+                                UNION ALL SELECT   4 UNION ALL SELECT   5 UNION ALL SELECT   6
+                                UNION ALL SELECT   7 UNION ALL SELECT   8 UNION ALL SELECT   9
+                            ) singles JOIN 
+                            (SELECT 0 tens
+                                UNION ALL SELECT  10 UNION ALL SELECT  20 UNION ALL SELECT  30
+                                UNION ALL SELECT  40 UNION ALL SELECT  50 UNION ALL SELECT  60
+                                UNION ALL SELECT  70 UNION ALL SELECT  80 UNION ALL SELECT  90
+                            ) tens  JOIN 
+                            (SELECT 0 hundreds
+                                UNION ALL SELECT  100 UNION ALL SELECT  200 UNION ALL SELECT  300
+                                UNION ALL SELECT  400 UNION ALL SELECT  500 UNION ALL SELECT  600
+                                UNION ALL SELECT  700 UNION ALL SELECT  800 UNION ALL SELECT  900
+                            ) hundreds
+                        ORDER BY number DESC) c  
+                    WHERE c.number BETWEEN 0 AND $mults_needed
+                ) dates
+                WHERE date between now() and now() + INTERVAL $horizon_days DAY
+                AND weekday(date) NOT IN (1, 2)
+                AND TIME(date) between TIME($open_time) and TIME($close_time);";
+
+                //TODO: use generated days to fill in (non-existing) appointment blocks in fr_appointments
+
+                /* Non-PHP SQL
+SET @minute_interval = 15;
+SET @horizon_days = 6;
+SET @open_time = '07:00';
+SET @close_time = '11:59';
+SET @mults_needed = @horizon_days*(60/@minute_interval)*24;
+
+SELECT date, WEEKDAY(date), TIME(date) FROM (
+    SELECT (CURDATE() + 1 + INTERVAL c.number*@minute_interval MINUTE) AS date
+        FROM (SELECT singles + tens + hundreds number FROM 
+            ( SELECT 0 singles
+                UNION ALL SELECT   1 UNION ALL SELECT   2 UNION ALL SELECT   3
+                UNION ALL SELECT   4 UNION ALL SELECT   5 UNION ALL SELECT   6
+                UNION ALL SELECT   7 UNION ALL SELECT   8 UNION ALL SELECT   9
+            ) singles JOIN 
+            (SELECT 0 tens
+                UNION ALL SELECT  10 UNION ALL SELECT  20 UNION ALL SELECT  30
+                UNION ALL SELECT  40 UNION ALL SELECT  50 UNION ALL SELECT  60
+                UNION ALL SELECT  70 UNION ALL SELECT  80 UNION ALL SELECT  90
+            ) tens  JOIN 
+            (SELECT 0 hundreds
+                UNION ALL SELECT  100 UNION ALL SELECT  200 UNION ALL SELECT  300
+                UNION ALL SELECT  400 UNION ALL SELECT  500 UNION ALL SELECT  600
+                UNION ALL SELECT  700 UNION ALL SELECT  800 UNION ALL SELECT  900
+            ) hundreds
+        ORDER BY number DESC) c  
+    WHERE c.number BETWEEN 0 AND @mults_needed
+) dates
+WHERE date between now() and now() + INTERVAL @horizon_days DAY
+AND weekday(date) NOT IN (1, 2)
+AND TIME(date) between TIME(@open_time) and TIME(@close_time)
+                */
+
+$result = $this->framework->query($sql);
         }
     }
-    */
 
     /**
      * @inheritdoc.
@@ -81,6 +143,10 @@ class ExternalModule extends AbstractExternalModule {
                 ],
                 'site_address' => [
                     'name' => 'Testing Site Address',
+                    'type' => 'text',
+                ],
+                'site_appointment_duration' => [
+                    'name' => 'Appointment duration (minutes)',
                     'type' => 'text',
                 ],
                 'open_time' => [
@@ -137,13 +203,13 @@ class ExternalModule extends AbstractExternalModule {
             ],
         ];
 
-        /*
-        SELECT id, appointment_block_date FROM redcap_fr_appointment
-        // concat site ID, get ABBRV
-            WHERE record_id == NULL
-            ORDER BY time, site
-            AND site == [selected_site];
-            // appear as: [site_id, KED - 04/24/2020 15:30]
+        /* SQL
+           SELECT a.id, CONCAT(b.site_short_name, ' - ', from_unixtime(a.appointment_block_date, '%m/%d/%Y %W %h:%i %p'))
+           FROM ((SELECT * FROM redcap_entity_fr_appointment
+            WHERE record_id IS NULL
+            ORDER BY appointment_block_date) as a
+            INNER JOIN redcap_entity_test_site as b
+            ON a.site = b.id);
             */
 
         return $types;
