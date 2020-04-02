@@ -56,7 +56,7 @@ class ExternalModule extends AbstractExternalModule {
         $closed_days = $data['closed_days'];
         $mults_needed = $horizon_days*(60/$minute_interval)*24;
         $site_id = $test_site->getId();
-        //$closed_days_line = (isset($closed_days)) ? "AND weekday(date) NOT IN (" . $closed_days . ")" : '';
+        $closed_days_line = (isset($closed_days)) ? "AND weekday(date) NOT IN (" . $closed_days . ")" : '';
 
         $sql = "
 INSERT INTO redcap_entity_fr_appointment (created, updated, site, appointment_block_date, project_id)
@@ -79,12 +79,19 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
                             UNION ALL SELECT  400 UNION ALL SELECT  500 UNION ALL SELECT  600
                             UNION ALL SELECT  700 UNION ALL SELECT  800 UNION ALL SELECT  900
                         ) hundreds
-                    ORDER BY number DESC) c  
+                    ORDER BY number DESC) c 
                 WHERE c.number BETWEEN 0 AND $mults_needed
             ) dates
-            WHERE date between now() and now() + INTERVAL $horizon_days DAY
-            AND weekday(date) NOT IN (" . $closed_days . ")
-            AND TIME(date) between TIME('$open_time') and TIME('$close_time')";
+            WHERE date between now() and now() + INTERVAL $horizon_days DAY " .
+            $closed_days_line . "
+            AND TIME(date) between TIME('$open_time') and TIME('$close_time') - INTERVAL 1 SECOND
+                -- do not create duplicate appointment times at any site
+                AND NOT EXISTS (
+                    SELECT * FROM redcap_entity_fr_appointment WHERE
+                    CONCAT(redcap_entity_fr_appointment.site, redcap_entity_fr_appointment.appointment_block_date)
+                        = CONCAT($site_id, FLOOR(UNIX_TIMESTAMP(date)))
+                )
+            ";
 
         $result = $this->framework->query($sql);
     }
