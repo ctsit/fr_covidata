@@ -48,5 +48,12 @@
         ]
     },
     "crons": [
+        {
+            "cron_name": "create_all_future_appointment_blocks",
+            "cron_description": "Create appointment blocks until horizon",
+            "method": "createAllFutureAppointmentBlocks",
+            "cron_frequency": "86400",
+            "cron_max_run_time": "360"
+        }
     ]
 }
