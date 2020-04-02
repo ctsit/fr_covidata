@@ -23,7 +23,6 @@ class ExternalModule extends AbstractExternalModule {
      * @inheritdoc.
      */
     function redcap_every_page_top($project_id) {
-
     }
 
     /**
@@ -46,14 +45,12 @@ class ExternalModule extends AbstractExternalModule {
             $data = $test_site->getData();
             $project_id = $data['project_id'];
             $minute_interval = $data['site_appointment_duration'];
-            //$open_time = "'" . $data['open_time'] . "'";
             $open_time = $data['open_time'];
             $close_time = ($data['close_time'] !== '00:00') ? $data['close_time'] : '23:59';
-            //$close_time = "'$close_time'";
             $horizon_days = $data['horizon_days'];
             $closed_days = $data['closed_days'];
             $mults_needed = $horizon_days*(60/$minute_interval)*24;
-            $site_id = 1;
+            $site_id = $test_site->getId();
             //$closed_days_line = (isset($closed_days)) ? "AND weekday(date) NOT IN (" . $closed_days . ")" : '';
 
             $sql = "
