@@ -25,6 +25,25 @@ class ExternalModule extends AbstractExternalModule {
     function redcap_every_page_top($project_id) {
     }
 
+    function redcap_save_record($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
+        $appointment_form = $this->getProjectSetting('appointment_form');
+        if ( $this->framework->isSurveyPage() && $instrument = $appointment_form) {
+            $get_data = [
+                'project_id' => $project_id,
+                'records' => [$record],
+                'events' => [$event_id]
+            ];
+            $redcap_data = \REDCap::getData($get_data);
+            $appointment_id = $redcap_data[$record][$event_id][$appointment_form];
+            $factory = new EntityFactory();
+            $Appointment = $factory->getInstance('fr_appointment', $appointment_id);
+            $Appointment->setData(['record_id' => $record]);
+            $Appointment->save();
+
+            //\REDCap::saveData(); // split relevant data out to @SURVEY-HIDDEN fields
+        }
+    }
+
     /**
      * @inheritdoc.
      */
