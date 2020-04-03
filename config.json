@@ -1,0 +1,60 @@
+{
+    "name": "FR_COVID",
+    "namespace": "FRCOVID\\ExternalModule",
+    "description": "Facilitate the scheduling and data management of COVID-19 testing for first responders. See the complete documentation at <a href='https://github.com/ctsit/fr_covidata'>https://github.com/ctsit/fr_covidata</a>",
+    "permissions": [
+        "redcap_every_page_top",
+        "redcap_module_system_enable",
+        "redcap_module_system_disable",
+        "redcap_save_record"
+    ],
+    "framework-version": 3,
+    "authors": [
+        {
+            "name": "Kyle Chesney",
+            "email": "kyle.chesney@ufl.edu",
+            "institution": "University of Florida - CTSI"
+        },
+        {
+            "name": "Taryn Stoffs",
+            "email": "tls@ufl.edu",
+            "institution": "University of Florida - CTSI"
+        },
+        {
+            "name": "Philip Chase",
+            "email": "pbc@ufl.edu",
+            "institution": "University of Florida - CTSI"
+        }
+    ],
+    "compatibility": {
+        "redcap-version-min": "9.3.5"
+    },
+    "project-settings": [
+        {
+            "key": "appointment_form",
+            "name": "Which instrument is used for appointments?",
+            "type": "form-list",
+            "required": true
+        }
+    ],
+    "links": {
+        "control-center": [
+        ],
+        "project": [
+            {
+                "name": "Define Sites",
+                "icon": "fas fa-clinic-medical",
+                "url": "plugins/site_entry.php"
+            }
+        ]
+    },
+    "crons": [
+        {
+            "cron_name": "create_all_future_appointment_blocks",
+            "cron_description": "Create appointment blocks until horizon",
+            "method": "createAllFutureAppointmentBlocks",
+            "cron_frequency": "86400",
+            "cron_max_run_time": "360"
+        }
+    ]
+}
