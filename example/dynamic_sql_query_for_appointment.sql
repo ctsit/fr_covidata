@@ -6,4 +6,6 @@ SELECT a.id, CONCAT(b.site_short_name, ' - ', from_unixtime(a.appointment_block_
             ORDER BY appointment_block_date
         ) as a
     INNER JOIN redcap_entity_test_site as b ON a.site = b.id
-    );
+    )
+    ORDER BY a.appointment_block_date
+    ;
