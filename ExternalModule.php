@@ -73,7 +73,7 @@ class ExternalModule extends AbstractExternalModule {
         $record_encode = str_pad(dechex($record_id), $record_pad, '0', STR_PAD_LEFT);
         $visit_encode = str_pad(dechex($instance_id), $instance_pad, '0', STR_PAD_LEFT);
         $check_digit = $this->generateLuhnChecksum($record_encode . $visit_encode);
-        return 'FRC-' . $record_encode . '-' . $visit_encode . '-' . $check_digit;
+        return strtoupper('FRC-' . $record_encode . '-' . $visit_encode . '-' . $check_digit);
     }
 
     function generateLuhnChecksum($input) {
@@ -86,7 +86,7 @@ class ExternalModule extends AbstractExternalModule {
             $addend = hexdec($input[$i]) * $factor;
             $addend = floor($addend / 16) + ($addend % 16); // sum of individual digits expressed in base16
 
-            $suma += $addend;
+            $sum += $addend;
             $factor = ($factor == 2) ? 1 : 2;
         }
 
