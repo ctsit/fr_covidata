@@ -7,8 +7,6 @@ use RCView;
 use REDCapEntity\EntityList;
 use REDCapEntity\StatusMessageQueue;
 
-require_once dirname(__DIR__) . '/PermissionChecker.php';
-
 class TestSiteList extends EntityList {
 
     protected function renderPageBody() {
