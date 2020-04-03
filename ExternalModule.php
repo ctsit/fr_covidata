@@ -17,46 +17,81 @@ class ExternalModule extends AbstractExternalModule {
 
     function redcap_save_record($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
         $appointment_form = $this->getProjectSetting('appointment_form');
-        if ( $this->framework->isSurveyPage() && $instrument = $appointment_form) {
-
-            $get_data = [
-                'project_id' => $project_id,
-                'records' => [$record],
-                'events' => [$event_id]
-            ];
-
-            $redcap_data = \REDCap::getData($get_data);
-
-            // Get appointment block id
-            // non repeating
-            //$appointment_id = $redcap_data[$record][$event_id][$appointment_form];
-            // repeating
-            $appointment_id = $redcap_data[$record]['repeat_instances'][$event_id][$appointment_form][$repeat_instance]['appointment'];
-
-            $factory = new EntityFactory();
-            $Appointment = $factory->getInstance('fr_appointment', $appointment_id);
-            $Appointment_data = $Appointment->getData();
-            $Appointment->setData(['record_id' => $record]);
-            $Appointment->save();
-            $Site = $factory->getInstance('test_site', $Appointment_data['site'])
-                ->getData();
-
-            $test_date_and_time = date('Y-m-d H:i', $Appointment_data['appointment_block_date']);
-
-            $save_data = [
-                'research_encounter_id' => $this->encodeUnique($record, $repeat_instance),
-                'site_short_name' => $Site['site_short_name'],
-                'site_long_name' => $Site['site_long_name'],
-                'site_address' => $Site['site_address'],
-                'test_date_and_time' => $test_date_and_time,
-                'test_type' => '',
-            ];
-            $redcap_data[$record]['repeat_instances'][$event_id][$appointment_form][$repeat_instance] = $save_data;
-
-
-            // split relevant data out to @SURVEY-HIDDEN fields
-            \REDCap::saveData($project_id, 'array', $redcap_data);
+        if ($instrument = $appointment_form) {
+            $this->splitAppointmentData($project_id, $record, $event_id, $appointment_form, $repeat_instance);
         }
+    }
+
+    function splitAppointmentData($project_id, $record, $event_id, $appointment_form, $repeat_instance = 1) {
+        $get_data = [
+            'project_id' => $project_id,
+            'records' => [$record],
+            'events' => [$event_id]
+            ];
+
+        $redcap_data = \REDCap::getData($get_data);
+
+        // Get appointment block id
+        // non repeating
+        //$appointment_id = $redcap_data[$record][$event_id][$appointment_form];
+        // repeating
+        $appointment_id = $redcap_data[$record]['repeat_instances'][$event_id][$appointment_form][$repeat_instance]['appointment'];
+
+        $factory = new EntityFactory();
+
+        //check for an existing appointment for this person and visit number
+        $results = $factory->query('fr_appointment')
+            ->condition('project_id', $project_id)
+            ->condition('record_id', $record)
+            ->condition('record_id_and_event', $repeat_instance)
+            ->execute();
+
+        if (!empty($results)) {
+            $old_appointment_id = key($results);
+            $this->cancelAppointment($factory, $old_appointment_id);
+        }
+
+        $schedule_info = $this->scheduleAppointment($factory, $project_id, $record, $appointment_id, $repeat_instance);
+        $appointment_data = $schedule_info[0];
+        $Site = $schedule_info[1];
+
+        $test_date_and_time = date('Y-m-d H:i', $appointment_data['appointment_block_date']);
+
+        $save_data = [
+            'research_encounter_id' => $this->encodeUnique($record, $repeat_instance),
+            'site_short_name' => $Site['site_short_name'],
+            'site_long_name' => $Site['site_long_name'],
+            'site_address' => $Site['site_address'],
+            'test_date_and_time' => $test_date_and_time,
+            'test_type' => '',
+        ];
+        $redcap_data[$record]['repeat_instances'][$event_id][$appointment_form][$repeat_instance] = $save_data;
+
+
+        // split relevant data out to @SURVEY-HIDDEN fields
+        \REDCap::saveData($project_id, 'array', $redcap_data);
+    }
+
+    function cancelAppointment($factory, $old_appointment_id) {
+            $OldAppointment = $factory->getInstance('fr_appointment', $old_appointment_id);
+            $OldAppointment->setData([
+                    'record_id' => NULL,
+                    'record_id_and_event' => NULL,
+            ]);
+            $OldAppointment->save();
+    }
+
+    function scheduleAppointment($factory, $project_id, $record_id, $appointment_id, $instance_id = 1) {
+        $Appointment = $factory->getInstance('fr_appointment', $appointment_id);
+        $Appointment_data = $Appointment->getData();
+        $Appointment->setData([
+                'record_id' => $record_id,
+                'record_id_and_event' => (string) $instance_id,
+        ]);
+        $Appointment->save();
+        $Site = $factory->getInstance('test_site', $Appointment_data['site'])
+            ->getData();
+        return [$Appointment_data, $Site];
     }
 
     function encodeUnique($record_id, $instance_id, $record_pad = 7, $instance_pad = 2) {
