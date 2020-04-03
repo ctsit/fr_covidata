@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Provides ExternalModule class for OnCore Client.
- */
 
 namespace FRCOVID\ExternalModule;
 
@@ -14,14 +10,8 @@ use REDCapEntity\EntityDB;
 use REDCapEntity\EntityFactory;
 use REDCapEntity\StatusMessageQueue;
 
-/**
- * ExternalModule class for OnCore Client.
- */
 class ExternalModule extends AbstractExternalModule {
 
-    /**
-     * @inheritdoc.
-     */
     function redcap_every_page_top($project_id) {
     }
 
@@ -37,6 +27,7 @@ class ExternalModule extends AbstractExternalModule {
 
             $redcap_data = \REDCap::getData($get_data);
 
+            // Get appointment block id
             // non repeating
             //$appointment_id = $redcap_data[$record][$event_id][$appointment_form];
             // repeating
@@ -98,9 +89,6 @@ class ExternalModule extends AbstractExternalModule {
         return $sum * 9 % 10;
     }
 
-    /**
-     * @inheritdoc.
-     */
     function redcap_module_system_enable($version) {
         EntityDB::buildSchema($this->PREFIX);
     }
@@ -169,9 +157,6 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
         $result = $this->framework->query($sql);
     }
 
-    /**
-     * @inheritdoc.
-     */
     function redcap_module_system_disable($version) {
         EntityDB::dropSchema($this->PREFIX);
     }
@@ -274,15 +259,6 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
                 ],
             ],
         ];
-
-        /* SQL
-           SELECT a.id, CONCAT(b.site_short_name, ' - ', from_unixtime(a.appointment_block_date, '%m/%d/%Y %W %h:%i %p'))
-           FROM ((SELECT * FROM redcap_entity_fr_appointment
-            WHERE record_id IS NULL
-            ORDER BY appointment_block_date) as a
-            INNER JOIN redcap_entity_test_site as b
-            ON a.site = b.id);
-            */
 
         return $types;
     }
