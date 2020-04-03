@@ -59,34 +59,39 @@ class ExternalModule extends AbstractExternalModule {
         }
     }
 
-    function encodeUnique($record_id, $instance_id, $record_pad = 8, $instance_pad = 2) {
+    function encodeUnique($record_id, $instance_id, $record_pad = 7, $instance_pad = 2) {
         /* converts record id and instance id into hex,
          * creates a checksum
          * concats all
-         * 16 characters
+         * 16 characters total
          * FRC-<record>-<instance>-checksum
-         * 8 characters for record
-         * 2 characters for instance
          * 6 characters for human readability ('FRC---')
+         * 7 characters for record; 16^7 = > 268 million records
+         * 2 characters for instance; 16^2 = 256 visits per person
+         * 1 character for checksum
          */
         $record_encode = str_pad(dechex($record_id), $record_pad, '0', STR_PAD_LEFT);
         $visit_encode = str_pad(dechex($instance_id), $instance_pad, '0', STR_PAD_LEFT);
         $check_digit = $this->generateLuhnChecksum($record_encode . $visit_encode);
-        echo 'FRC-' . $record_encode . '-' . $visit_encode . '-' . $check_digit;
+        return 'FRC-' . $record_encode . '-' . $visit_encode . '-' . $check_digit;
     }
 
     function generateLuhnChecksum($input) {
         // https://en.wikipedia.org/wiki/Luhn_mod_N_algorithm
         $sum = 0;
-        $parity = 1;
+        $factor = 2;
+
         settype($input, 'string');
         for ($i = strlen($input) - 1; $i >= 0; $i--) {
-            $factor = $parity ? 2 : 1;
-            $parity = $parity ? 0 : 1;
-            $sum += array_sum(str_split(hexdec($input[$i]) * $factor));
+            $addend = hexdec($input[$i]) * $factor;
+            $addend = floor($addend / 16) + ($addend % 16); // sum of individual digits expressed in base16
+
+            $suma += $addend;
+            $factor = ($factor == 2) ? 1 : 2;
         }
 
-        return $sum * 9 % 10;
+        $remainder = $sum % 16;
+        return dechex( (16 - $remainder) % 16 );
     }
 
     function redcap_module_system_enable($version) {
