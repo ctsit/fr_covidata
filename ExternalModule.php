@@ -53,7 +53,7 @@ class ExternalModule extends AbstractExternalModule {
             $test_date_and_time = date('Y-m-d H:i', $Appointment_data['appointment_block_date']);
 
             $save_data = [
-                'research_encounter_id' => $record . '-' . $repeat_instance,
+                'research_encounter_id' => $this->encodeUnique($record, $repeat_instance),
                 'site_short_name' => $Site['site_short_name'],
                 'site_long_name' => $Site['site_long_name'],
                 'site_address' => $Site['site_address'],
@@ -66,6 +66,36 @@ class ExternalModule extends AbstractExternalModule {
             // split relevant data out to @SURVEY-HIDDEN fields
             \REDCap::saveData($project_id, 'array', $redcap_data);
         }
+    }
+
+    function encodeUnique($record_id, $instance_id, $record_pad = 8, $instance_pad = 2) {
+        /* converts record id and instance id into hex,
+         * creates a checksum
+         * concats all
+         * 16 characters
+         * FRC-<record>-<instance>-checksum
+         * 8 characters for record
+         * 2 characters for instance
+         * 6 characters for human readability ('FRC---')
+         */
+        $record_encode = str_pad(dechex($record_id), $record_pad, '0', STR_PAD_LEFT);
+        $visit_encode = str_pad(dechex($instance_id), $instance_pad, '0', STR_PAD_LEFT);
+        $check_digit = $this->generateLuhnChecksum($record_encode . $visit_encode);
+        echo 'FRC-' . $record_encode . '-' . $visit_encode . '-' . $check_digit;
+    }
+
+    function generateLuhnChecksum($input) {
+        // https://en.wikipedia.org/wiki/Luhn_mod_N_algorithm
+        $sum = 0;
+        $parity = 1;
+        settype($input, 'string');
+        for ($i = strlen($input) - 1; $i >= 0; $i--) {
+            $factor = $parity ? 2 : 1;
+            $parity = $parity ? 0 : 1;
+            $sum += array_sum(str_split(hexdec($input[$i]) * $factor));
+        }
+
+        return $sum * 9 % 10;
     }
 
     /**
