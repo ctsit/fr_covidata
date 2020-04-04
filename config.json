@@ -35,6 +35,22 @@
             "name": "Which instrument is used for appointments?",
             "type": "form-list",
             "required": true
+        },
+        {
+            "key": "repeat_implement",
+            "name": "Which instrument is used for appointments?",
+            "type": "radio",
+            "choices": [
+                {
+                    "name": "Repeat instances",
+                    "value": "instances"
+                },
+                {
+                    "name": "Individual events",
+                    "value": "individual_events"
+                }
+            ],
+            "required": true
         }
     ],
     "links": {
