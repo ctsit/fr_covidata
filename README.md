@@ -16,9 +16,10 @@ This REDCap module facilitates the scheduling and data management of COVID-19 te
 To configure and use this module, follow these steps:
 
 1. Create a REDCap project from the file [`First_Responder_COVID19.xml`](example/First_Responder_COVID19.xml)
-1. Update the `appointments` field on the `Appointments Form`, changing it to a Dynamic SQL field and configuring it to auto-complete.
+1. Update the `appointments` field on the `Appointments Form`, changing it to a Dynamic SQL field and configuring it to auto-complete. Paste the appropriate code from [example/dynamic_sql_query_for_appointment.sql](example/dynamic_sql_query_for_appointment.sql)
 1. Enable the FR Covidata module as described above
 1. Configure the FR Covidata module identify to set `Which instrument is used for appointments?`
+1. Configure the FR Covidata module to indicate which repeat type is used for repeats: _Repeating instances_ or _Individual Events_
 1. Use a MySQL client to load sites data from [`redcap_entity_test_site_data.sql`](example/redcap_entity_test_site_data.sql)
 1. Adjust the project_ids referenced on those just-loaded sites by editing and running a copy of [`redcap_entity_test_site_update.sql`](example/redcap_entity_test_site_update.sql)
 1. Generate the initial appointment blocks by accessing `Define Sites` and clicking `Generate future appointments for all sites`

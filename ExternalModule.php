@@ -120,8 +120,8 @@ class ExternalModule extends AbstractExternalModule {
          * creates a checksum
          * concats all
          * 16 characters total
-         * FRC-<record>-<instance>-checksum
-         * 6 characters for human readability ('FRC---')
+         * <record>-<instance>-checksum
+         * 2 characters for human readability ('--')
          * 7 characters for record; 16^7 = > 268 million records
          * 2 characters for instance; 16^2 = 256 visits per person
          * 1 character for checksum
@@ -129,7 +129,7 @@ class ExternalModule extends AbstractExternalModule {
         $record_encode = str_pad(dechex($record_id), $record_pad, '0', STR_PAD_LEFT);
         $visit_encode = str_pad(dechex($instance_id), $instance_pad, '0', STR_PAD_LEFT);
         $check_digit = $this->generateLuhnChecksum($record_encode . $visit_encode);
-        return strtoupper('FRC-' . $record_encode . '-' . $visit_encode . '-' . $check_digit);
+        return strtoupper($record_encode . '-' . $visit_encode . '-' . $check_digit);
     }
 
     function generateLuhnChecksum($input) {

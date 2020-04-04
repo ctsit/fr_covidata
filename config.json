@@ -38,7 +38,7 @@
         },
         {
             "key": "repeat_implement",
-            "name": "Which instrument is used for appointments?",
+            "name": "Which repeat type is used for appointments?",
             "type": "radio",
             "choices": [
                 {
