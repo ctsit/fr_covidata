@@ -43,7 +43,7 @@ class ExternalModule extends AbstractExternalModule {
         $results = $factory->query('fr_appointment')
             ->condition('project_id', $project_id)
             ->condition('record_id', $record)
-            ->condition('record_id_and_event', $repeat_instance)
+            ->condition('instance_id', $repeat_instance)
             ->execute();
 
         if (!empty($results)) {
@@ -55,7 +55,7 @@ class ExternalModule extends AbstractExternalModule {
         $appointment_data = $schedule_info[0];
         $Site = $schedule_info[1];
 
-        $test_date_and_time = date('Y-m-d H:i', $appointment_data['appointment_block_date']);
+        $test_date_and_time = date('Y-m-d H:i', $appointment_data['appointment_block']);
 
         $save_data = [
             'research_encounter_id' => $this->encodeUnique($record, $repeat_instance),
@@ -76,7 +76,7 @@ class ExternalModule extends AbstractExternalModule {
             $OldAppointment = $factory->getInstance('fr_appointment', $old_appointment_id);
             $OldAppointment->setData([
                     'record_id' => NULL,
-                    'record_id_and_event' => NULL,
+                    'instance_id' => NULL,
             ]);
             $OldAppointment->save();
     }
@@ -86,7 +86,7 @@ class ExternalModule extends AbstractExternalModule {
         $Appointment_data = $Appointment->getData();
         $Appointment->setData([
                 'record_id' => $record_id,
-                'record_id_and_event' => (string) $instance_id,
+                'instance_id' => (string) $instance_id,
         ]);
         $Appointment->save();
         $Site = $factory->getInstance('test_site', $Appointment_data['site'])
@@ -160,7 +160,7 @@ class ExternalModule extends AbstractExternalModule {
         $closed_days_line = (isset($closed_days)) ? "AND weekday(date) NOT IN (" . $closed_days . ")" : '';
 
         $sql = "
-INSERT INTO redcap_entity_fr_appointment (created, updated, site, appointment_block_date, project_id)
+INSERT INTO redcap_entity_fr_appointment (created, updated, site, appointment_block, project_id)
 SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date)), $project_id
             FROM (
                 SELECT (CURDATE() + 1 + INTERVAL c.number*$minute_interval MINUTE) AS date
@@ -183,13 +183,13 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
                     ORDER BY number DESC) c 
                 WHERE c.number BETWEEN 0 AND $mults_needed
             ) dates
-            WHERE date between now() and now() + INTERVAL $horizon_days DAY " .
+            WHERE date between now() and CAST( (CURDATE() + INTERVAL (1 + $horizon_days) DAY) AS DATETIME ) " .
             $closed_days_line . "
             AND TIME(date) between TIME('$open_time') and TIME('$close_time') - INTERVAL 1 SECOND
                 -- do not create duplicate appointment times at any site
                 AND NOT EXISTS (
                     SELECT * FROM redcap_entity_fr_appointment WHERE
-                    CONCAT(redcap_entity_fr_appointment.site, redcap_entity_fr_appointment.appointment_block_date)
+                    CONCAT(redcap_entity_fr_appointment.site, redcap_entity_fr_appointment.appointment_block)
                         = CONCAT($site_id, FLOOR(UNIX_TIMESTAMP(date)))
                 )
             ";
@@ -254,6 +254,10 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
                     'name' => 'Future days of appointments',
                     'type' => 'text',
                 ],
+                'testing_type' => [
+                    'name' => 'Type of testing done at this site',
+                    'type' => 'text',
+                ],
                 'project_id' => [
                     'name' => 'Project ID',
                     'type' => 'project',
@@ -270,12 +274,8 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
                 'project' => 'project_id',
             ],
             'properties' => [
-                'appointment_block_date' => [
+                'appointment_block' => [
                     'name' => 'Appointment Block',
-                    'type' => 'date',
-                ],
-                'appointment_block_time' => [
-                    'name' => 'Appointment',
                     'type' => 'date',
                 ],
                 'site' => [
@@ -288,8 +288,8 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
                     'type' => 'record',
                 ],
                 // make unique constraint
-                'record_id_and_event' => [
-                    'name' => 'REDCap Record + event',
+                'instance_id' => [
+                    'name' => 'Instance id',
                     'type' => 'text',
                 ],
                 'project_id' => [
