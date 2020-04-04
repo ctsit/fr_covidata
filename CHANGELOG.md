@@ -2,6 +2,17 @@
 All notable changes to the First Responder COVID-19 Testing project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [0.3.0] - 2020-04-04
+### Changed
+- Remove "FRC-" prefix from research_encounter_id (Philip Chase)
+- Update test_site_data (Philip Chase)
+- Add swabandserum and AEDS to appointment form of project XML (Philip Chase)
+- support repeat instances and individual events, add testing_type to site, rename db columns again (Kyle Chesney)
+- Add custom event label to events to project XML (Philip Chase)
+- update names of entity columns, alter code accordingly improve appointment block generation (Kyle Chesney)
+
+
 ## [0.2.0] - 2020-04-03
 ### Changed
 - Update project XML (Philip Chase)
