@@ -14,11 +14,12 @@ record_id <- tibble(record_id = seq(from = 1, to = n))
 
 # Get same names and fake demographic data
 email_addresses <- c("pbc@ufl.edu", "tls@ufl.edu")
-demographic_data <- read_csv("us-500.csv") %>%
+demographic_data <- read_csv("us-500.csv")
+demographic_data <- demographic_data %>%
   mutate(email = sample(email_addresses, nrow(demographic_data), replace = TRUE)) %>%
   sample_n(n)
 
- # make ICF
+# make ICF
 icf <- make_icf_data(record_id, n, demographic_data, "baseline_arm_1")
 write_csv(icf, "output/villages_informed_consent_form_2.csv", na = "")
 
@@ -31,5 +32,8 @@ write_csv(questionnaire, "output/questionnaire.csv", na = "")
 # mini questionnaire
 record_id_n <- make_mini_fraction(record_id,   1.0, "baseline_arm_1", "output/mini_questionnaire_0.csv")
 record_id_n <- make_mini_fraction(record_id_n, 0.7, "retest_1_arm_1", "output/mini_questionnaire_1.csv")
+record_id_1 <- record_id_n
 record_id_n <- make_mini_fraction(record_id_n, 0.7, "retest_2_arm_1", "output/mini_questionnaire_2.csv")
+record_id_2 <- record_id_n
 record_id_n <- make_mini_fraction(record_id_n, 0.7, "retest_3_arm_1", "output/mini_questionnaire_3.csv")
+record_id_3 <- record_id_n
