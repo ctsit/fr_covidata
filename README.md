@@ -58,12 +58,12 @@ The module will define a cron job that runs daily to assure _appointment horizon
 
 ## Using test data
 
-The [example](./example/) folder includes RScript to generate test datasets for the ICF, Questionnaire and Mini Questionnaire. Together, these import files can speed the process of testing the custom code used in these project. To load test data, erase all data in the project, then load these three files from [./example/output/](./example/output/):
+The [`test_data`](./test_data/) folder includes RScript to generate test datasets for the ICF, Questionnaire and Mini Questionnaire. Together, these import files can speed the process of testing the custom code used in these project. To make test data. Open the R Project in the [`test_data`](./test_data/) folder and run `make_test_data.R`. If you provide a file called `replacement_demographics.csv` and it has the columns first_name, last_name, email, and phone1 the RScript will replace the first_name, email, and phone on each demographic record. 
+
+To load test data, erase all data in the project, then load these three files from [`./test_data/output/`](./test_data/output/):
 
 ```
-villages_informed_consent_form_2.csv
-questionnaire.csv
-mini_questionnaire_0.csv
+all_baseline_data.csv
 ```
 
 There are additional `mini_questionnaire_0*` files, but they might not be useful for typical testing. They fill in the mini-question with diminishing frequency, but they do it out of sync with the Appointment and Result forms. That is probably not helpful, but they are provided here should they prove useful.
