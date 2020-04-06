@@ -31,6 +31,12 @@
     },
     "project-settings": [
         {
+            "key": "location_id",
+            "name": "Which location ID is this project for? (0-15)",
+            "type": "text",
+            "required": true
+        },
+        {
             "key": "appointment_form",
             "name": "Which instrument is used for appointments?",
             "type": "form-list",
