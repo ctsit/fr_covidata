@@ -110,3 +110,12 @@ make_mini_questionnaire <- function(record_id, n, event_name) {
 
   return(form)
 }
+
+make_mini_fraction <- function(record_id, fraction, arm, output_file) {
+  mini_n = round(fraction*nrow(record_id))
+  record_id_n = sample_n(record_id, mini_n)
+  mini_questionnaire_n <- make_mini_questionnaire(record_id_n, mini_n, arm)
+  write_csv(mini_questionnaire_n, output_file, na = "")
+  return(record_id_n)
+}
+

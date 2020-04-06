@@ -29,22 +29,7 @@ questionnaire <- make_questionnaire(record_id, n, demographic_data, "baseline_ar
 write_csv(questionnaire, "output/questionnaire.csv", na = "")
 
 # mini questionnaire
-mini_n = n
-record_id_n = record_id
-mini_questionnaire_0 <- make_mini_questionnaire(record_id, n, "baseline_arm_1")
-write_csv(mini_questionnaire_0, "output/mini_questionnaire_0.csv", na = "")
-
-mini_n = round(0.7*n)
-record_id_n = sample_n(record_id_n, mini_n)
-mini_questionnaire_n <- make_mini_questionnaire(record_id_n, mini_n, "retest_1_arm_1")
-write_csv(mini_questionnaire_n, "output/mini_questionnaire_1.csv", na = "")
-
-mini_n = round(0.7*mini_n)
-record_id_n = sample_n(record_id_n, mini_n)
-mini_questionnaire_n <- make_mini_questionnaire(record_id_n, mini_n, "retest_2_arm_1")
-write_csv(mini_questionnaire_n, "output/mini_questionnaire_2.csv", na = "")
-
-mini_n = round(0.7*mini_n)
-record_id_n = sample_n(record_id_n, mini_n)
-mini_questionnaire_n <- make_mini_questionnaire(record_id_n, mini_n, "retest_3_arm_1")
-write_csv(mini_questionnaire_n, "output/mini_questionnaire_3.csv", na = "")
+record_id_n <- make_mini_fraction(record_id,   1.0, "baseline_arm_1", "output/mini_questionnaire_0.csv")
+record_id_n <- make_mini_fraction(record_id_n, 0.7, "retest_1_arm_1", "output/mini_questionnaire_1.csv")
+record_id_n <- make_mini_fraction(record_id_n, 0.7, "retest_2_arm_1", "output/mini_questionnaire_2.csv")
+record_id_n <- make_mini_fraction(record_id_n, 0.7, "retest_3_arm_1", "output/mini_questionnaire_3.csv")
