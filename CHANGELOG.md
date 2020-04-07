@@ -2,6 +2,12 @@
 All notable changes to the First Responder COVID-19 Testing project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.4.1] - 2020-04-07
+### Changed
+- Correct issue in form test in redcap_save_record (Kyle Chesney)
+- Fix site longnames, short names, close and open (Philip Chase)
+- prevent hiding of any previously scheduled appointment for a record to prevent data loss due to null entries (Kyle Chesney)
+
 
 ## [0.4.0] - 2020-04-07
 ### Added
