@@ -25,9 +25,11 @@ SELECT a.id, CONCAT(b.site_short_name, ' - ', from_unixtime(a.appointment_block,
                 )
             AND project_id = [project-id]
             -- If it is later than 4pm, only show appointments at least 2 days from today
-            AND appointment_block > UNIX_TIMESTAMP( DATE( NOW() + INTERVAL IF(HOUR(NOW()) >= 16, 2, 1) DAY ) )
-            -- don't hide ANY previously set appointments for this person to avoid redcap placing NULL in appointment_id
+            AND (
+            ( appointment_block > UNIX_TIMESTAMP( DATE( NOW() + INTERVAL IF(HOUR(NOW()) >= 16, 2, 1) DAY ) ) )
+            -- unless it's an entry for the same visit for this person
             OR record_id = [record-name]
+            )
             ORDER BY appointment_block
         ) as a
     INNER JOIN redcap_entity_test_site as b ON a.site = b.id
