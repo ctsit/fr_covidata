@@ -17,7 +17,7 @@ class ExternalModule extends AbstractExternalModule {
 
     function redcap_save_record($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
         $appointment_form = $this->framework->getProjectSetting('appointment_form');
-        if ($instrument = $appointment_form) {
+        if ($instrument == $appointment_form) {
             $repeat_implement = $this->framework->getProjectSetting('repeat_implement');
             $using_repeat_instances = 0;
             if ($repeat_implement == 'instances') {
