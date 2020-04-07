@@ -3,6 +3,15 @@ All notable changes to the First Responder COVID-19 Testing project will be docu
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.4.0] - 2020-04-07
+### Added
+- Add location id to research_encounter_id (Kyle Chesney, Philip Chase)
+- Add make_test_data.R with icf, q, and mini_q_0 -- mini_q_3 (Philip Chase)
+
+### Changed
+- Fix open and close times on KED (Philip Chase)
+
+
 ## [0.3.0] - 2020-04-04
 ### Changed
 - Remove "FRC-" prefix from research_encounter_id (Philip Chase)
