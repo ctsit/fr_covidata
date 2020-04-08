@@ -1,30 +1,38 @@
 # REDCap First Responder COVID-19
 
-This REDCap module facilitates the scheduling and data management of COVID-19 testing for first responders. This project was created by the CTS-IT at the University of Florida to support testing of first responders in Gainesville, Florida and Alachua County.
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3745255.svg)](https://doi.org/10.5281/zenodo.3745255)
+
+A REDCap module to facilitate the scheduling and data management of COVID-19 testing for first responders. This project was created by a multidisciplinary team at the University of Florida to support the testing of first responders in Alachua County, Florida and the surrounding counties.
+
+
+## Caution
+This module was created with numerous abstractions to allow it to be reused in other sites and projects, yet there remain some hard-coded project features. We advise you to use the included Project XML as a starting point to minimize your challenges in running this module. Also, be aware the data entry fields for site data do not carefully test the values keyed in. We recommend you start with the included example sites file, then make modifications.
 
 ## Prerequisites
 - REDCap >= 9.3.5
-- [REDCap Entity](https://github.com/ctsit/redcap_entity) >= 2.3.0
+- [REDCap Entity](https://github.com/ctsit/redcap_entity) >= 2.3.3
 
 ## Manual Installation
-- Clone this repo into to `<redcap-root>/modules/fr_covidata_v0.0.0`.
-- Clone [redcap_entity](https://github.com/ctsit/redcap_entity) repo into `<redcap-root>/modules/fr_covidata_v0.0.0`.
-- Go to **Control Center > External Modules**, enable REDCap Entity, and then this module. REDCap Entity will be enabled globally, but this module has to be enabled on a per-project basis after *Global Configuration* is completed.
+- Clone this repo into `<redcap-root>/modules/fr_covidata_v0.0.0`.
+- Clone the [redcap_entity](https://github.com/ctsit/redcap_entity) repo into `<redcap-root>/modules/redcap_entity_v0.0.0`.
+- Go to **Control Center > External Modules**, enable REDCap Entity, and then this module. REDCap Entity will be enabled globally, but `fr_covidata` has to be enabled on a per-project basis after *Global Configuration* is completed.
 
 ## Configuration
 
 To configure and use this module, follow these steps:
 
 1. Create a REDCap project from the file [`First_Responder_COVID19.xml`](example/First_Responder_COVID19.xml)
-1. Update the `appointments` field on the `Appointments Form`, changing it to a Dynamic SQL field and configuring it to auto-complete. Paste the appropriate code from [example/dynamic_sql_query_for_appointment.sql](example/dynamic_sql_query_for_appointment.sql)
+1. Update the `appointments` field on the `Appointments Form`, changing it to a Dynamic SQL field and configuring it to auto-complete. Paste the appropriate code from [`example/dynamic_sql_query_for_appointment.sql`](example/dynamic_sql_query_for_appointment.sql)
 1. Enable the FR Covidata module as described above.
 1. Configure the FR Covidata module identify to set `Which location ID is this project for? (0-15)`. This will reduce the risk of errors if one lab is processing specimens from different REDCap projects. Start with 0 and work your way up if you have to deploy multiple production instances of this module.
 1. Configure the FR Covidata module identify to set `Which instrument is used for appointments?` In the included REDCap XML files, the form is named "Appointments".
 1. Configure the FR Covidata module to indicate which repeat type is used for repeats: _Repeating instances_ or _Individual Events_. In the included REDCap XML files, _events_ are used.
-1. Use a MySQL client to load sites data from [`redcap_entity_test_site_data.sql`](example/redcap_entity_test_site_data.sql). Alternatively, use the `Define Sites` page of this module to enter the data. Be cautious as some portions of the interface of this module have very few guard rails. I.e., your data entry will not be checked. Time did not allow the additon of these tests nor does it allow for much documentation. As such, the authors advise you to _use the example configuration_ as a starting point.
+![](images/module_configuration_for_fr_covid_module.png)
+1. Use a MySQL client to load sites data from [`redcap_entity_test_site_data.sql`](example/redcap_entity_test_site_data.sql). Alternatively, use the `Define Sites` page of this module to enter the data. Be cautious as some portions of the interface of this module have very few guard rails. I.e., your data entry will not be checked. Time did not allow the addition of these tests, nor does it allow for much documentation. As such, the authors advise you to _use the example configuration_ as a starting point.
 1. Adjust the project_ids referenced on those just-loaded sites by editing and running a copy of [`redcap_entity_test_site_update.sql`](example/redcap_entity_test_site_update.sql)
 1. Access `Define Sites` to make any needed changes to the site definitions.
 1. Generate the initial appointment blocks by accessing `Define Sites` and clicking `Generate future appointments for all sites`
+![](images/define_sites.png)
 
 
 ## Appointment Scheduling Features
@@ -35,7 +43,7 @@ Once assigned to a person, an appointment block is no longer available. This fea
 
 If the research participant needs to cancel or change an appointment, they must call the Study Team. The study team will access the REDCap project, locate the participant's record, and cancel or replace the existing appointment.
 
-The table of appointments is managed by REDCap Entity. 
+REDCap Entity manages the table of appointments. 
 
 
 ## Site Management Features
@@ -44,18 +52,20 @@ A _site_ is a COVID-19 testing site. A study coordinator or REDCap admin must de
 
 REDCap Entity manages the site data. A study coordinator or REDCap admin can populate the site table by accessing the Define Sites page. It allows for CRUD operations on sites for this project.
 
-Each site allows the configuration of a long name, short name, appointment duration, address, open time, close time, closed days of the week, the number of appointment days to build out in advance. The open and close times are bounds on the generation of appointments.
+Each site allows the configuration of a long name, short name, appointment duration, address, open time, close time, closed days of the week, and the number of appointment days to build out in advance. The open and close times are bounds on the generation of appointments.
 
 
 ## Appointment Block Management Features
 
 An _appointment block_ is a fixed block of time at a single site. Appointment blocks must be created for a site before a research participant can schedule an appointment at that site.
 
-Appointment block creation is managed by this module. Those scripts can be run manually or automatically. These appointment blocks will be automatically generated nightly or when a study coordinator presses the `Generate future appointments for all sites` button of the Define sites page.
+This module manages appointment block creation. The script that makes the appointment blocks can be run manually or automatically. The appointment blocks are generated when a study coordinator presses the `Generate future appointments for all sites` button of the Define sites page or automatically by a cron job that runs each day.
 
-Appointment block creation uses the _appointment horizon_, _site id_, _open_, _close_, and _appointment duration_ attributes for each site to generate records in the appointments table. It will generate _appointment horizon_ days of appointment blocks for each site if those blocks do not already exist.
+Appointment block creation uses the _appointment horizon_, _site id_, _open_, _close_, _closed_days_, and _appointment duration_ attributes for each site to generate records in the appointments table. It will create _appointment horizon_ days of appointment blocks for each site if those blocks do not already exist.
 
-The module will define a cron job that runs daily to assure _appointment horizon_ days of appointment blocks exist at all times.
+The module will define a cron job that runs daily to assure _appointment horizon_ days of appointment blocks exist at all times. Whether you let the cron job make the appointments or click the `Generate future appointments for all sites` button to make them, the underlying code will create appointment blocks starting on the _next day_. For example, if you configure a site to have three days of appointments, then click the button on Monday, the script will create appointments on Tuesday, Wednesday, and Thursday. If the same site were closed on Wednesday, the script would create appointments only on Tuesday and Thursday. 
+
+Note: If you want to change the time at which the cron job runs, you will need to edit the timestamps in this module's most recent record in the table `redcap_crons_history`. 
 
 
 ## Using test data
