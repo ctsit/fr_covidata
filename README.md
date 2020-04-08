@@ -115,15 +115,16 @@ To clone a development project into a production project, follow the steps below
 1. Configure the FR Covidata module identify to set `Which location ID is this project for? (0-15)`. Change this to _not_ match the location in the development project.
 1. Configure the FR Covidata module identify to set `Which instrument is used for appointments?` In the included REDCap XML files, the form is named "Appointments".
 1. Configure the FR Covidata module to indicate which repeat type is used for repeats: _Repeating instances_ or _Individual Events_. In the included REDCap XML files, _events_ are used.
-1. Use a MySQL client to load sites data from [`redcap_entity_test_site_data.sql`](example/redcap_entity_test_site_data.sql).
+1. Use a MySQL client to load the site data from [`redcap_entity_test_site_data.sql`](example/redcap_entity_test_site_data.sql).
 1. Adjust the project_ids referenced on those just-loaded sites by editing and running a copy of [`redcap_entity_test_site_update.sql`](example/redcap_entity_test_site_update.sql)
 1. Access `Define Sites` to make any needed changes to the site definitions.
 1. Generate the initial appointment blocks by accessing `Define Sites` and clicking `Generate future appointments for all sites`.
-1. Add an API token for the data manager and send the token to be integrated into Rscipt-based toolsl that need it.
-1. Assign User Rights privileges to the Study team lead so they can make role and adjust user rights for their team.
+1. Add an API token for the data manager and send the token to be integrated into Rscript-based tools that need it.
+1. Assign User Rights privileges to the Study team lead so they can make roles and adjust user rights for their team.
 1. Delete reports that are only relevant in the development.
 1. Edit Alerts to remove testing email addresses in the To: field, set From addresses to something reasonable, "TEST" banner at the top of the emails, and "TESTING:" from the subject lines.
 1. Switch the project to production mode.
 1. Disable the Project Overlay Banner module.
 1. Add the Public Survey URL to the public-facing landing page.
-1. The project is now deployed.
+1. You have now completed the project deployment.
+
