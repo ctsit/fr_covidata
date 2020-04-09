@@ -6,6 +6,7 @@ use ExternalModules\AbstractExternalModule;
 
 use RCView;
 use REDCap;
+use Records;
 use REDCapEntity\EntityDB;
 use REDCapEntity\EntityFactory;
 use REDCapEntity\StatusMessageQueue;
@@ -178,15 +179,19 @@ class ExternalModule extends AbstractExternalModule {
         $close_time = ($data['close_time'] !== '00:00') ? $data['close_time'] : '23:59';
         $horizon_days = $data['horizon_days'];
         $closed_days = $data['closed_days'];
-        $mults_needed = $horizon_days*(60/$minute_interval)*24;
+        $mults_needed = (1 + $horizon_days)*(60/$minute_interval)*24;
         $site_id = $test_site->getId();
         $closed_days_line = (isset($closed_days)) ? "AND weekday(date) NOT IN (" . $closed_days . ")" : '';
+        $start_date = $data['start_date'];
+
+        // If the start_date is in the past or not set, use today's date
+        $start_date = (!empty($start_date) && $start_date > time()) ? strftime('%Y-%m-%d', $start_date) : date('Y-m-d');
 
         $sql = "
 INSERT INTO redcap_entity_fr_appointment (created, updated, site, appointment_block, project_id)
 SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date)), $project_id
             FROM (
-                SELECT (CURDATE() + 1 + INTERVAL c.number*$minute_interval MINUTE) AS date
+                SELECT (DATE('$start_date') + INTERVAL c.number*$minute_interval MINUTE) AS date
                     FROM (SELECT singles + tens + hundreds number FROM 
                         ( SELECT 0 singles
                             UNION ALL SELECT   1 UNION ALL SELECT   2 UNION ALL SELECT   3
@@ -206,7 +211,7 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
                     ORDER BY number DESC) c 
                 WHERE c.number BETWEEN 0 AND $mults_needed
             ) dates
-            WHERE date between now() and CAST( (CURDATE() + INTERVAL (1 + $horizon_days) DAY) AS DATETIME ) " .
+            WHERE date between DATE('$start_date') and CAST( (DATE('$start_date') + INTERVAL (1 + $horizon_days) DAY) AS DATETIME ) " .
             $closed_days_line . "
             AND TIME(date) between TIME('$open_time') and TIME('$close_time') - INTERVAL 1 SECOND
                 -- do not create duplicate appointment times at any site
@@ -218,10 +223,6 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
             ";
 
         $result = $this->framework->query($sql);
-    }
-
-    function redcap_module_system_disable($version) {
-        EntityDB::dropSchema($this->PREFIX);
     }
 
     function redcap_entity_types() {
@@ -272,6 +273,10 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
                         '5' => 'Saturday',
                         '6' => 'Sunday',
                     ]
+                ],
+                'start_date' => [
+                    'name' => 'First date of available appointments',
+                    'type' => 'date',
                 ],
                 'horizon_days' => [
                     'name' => 'Future days of appointments',
