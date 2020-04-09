@@ -67,11 +67,6 @@
                 "name": "Define Sites",
                 "icon": "fas fa-clinic-medical",
                 "url": "plugins/site_entry.php"
-            },
-            {
-                "name": "Appointment Blocks",
-                "icon": "fas fa-clinic-medical",
-                "url": "plugins/appointment_blocks.php"
             }
         ]
     },
