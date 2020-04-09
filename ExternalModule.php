@@ -362,4 +362,59 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
 		return $success;
     }
 
+    function addEmailAlertsToAllProjectComments() {
+        $projects = $this->framework->getProjectsWithModuleEnabled();
+        foreach($projects as $project_id) {
+            $this->addEmailAlertsToProjectComments($project_id);
+        }
+    }
+
+    function addEmailAlertsToProjectComments($project_id) {
+        $sql = "SELECT record, event_id, last_sent FROM (
+                (SELECT * FROM `redcap_alerts`
+                    WHERE
+                    project_id = $project_id
+                 AND alert_title = 'Negative result swab'
+                 ) as ra
+                INNER JOIN redcap_alerts_sent AS ras ON ras.alert_id = ra.alert_id
+            );";
+        $result = $this->framework->query($sql);
+        $results = $result->fetch_all(MYSQLI_ASSOC);
+
+        if (empty($results)) return;
+
+        $records = [];
+        $events = [];
+        foreach($results as $result) {
+            array_push($records, $result['record']);
+            array_push($events, $result['event_id']);
+        }
+
+
+        $get_data = [
+            'project_id' => $project_id,
+            'records' => array_values($records),
+            'events' => array_values($events)
+            ];
+
+        $redcap_data = \REDCap::getData($get_data);
+
+        foreach ($results as $result) {
+            $comment_contents = "Negative alert email sent: ";
+            $record = $result['record'];
+            $event_id = $result['event_id'];
+            $comment_contents .= $result['last_sent'];
+            if (empty($redcap_data[$record][$event_id]['result_comments'])) {
+                $redcap_data[$record][$event_id] = [
+                    'result_comments' => $comment_contents
+                ];
+            } else {
+                // prevent from re-writing to the field again
+                unset($redcap_data[$record]);
+            }
+        }
+
+        \REDCap::saveData($project_id, 'array', $redcap_data);
+    }
+
 }

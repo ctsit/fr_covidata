@@ -67,6 +67,11 @@
                 "name": "Define Sites",
                 "icon": "fas fa-clinic-medical",
                 "url": "plugins/site_entry.php"
+            },
+            {
+                "name": "Appointment Blocks",
+                "icon": "fas fa-clinic-medical",
+                "url": "plugins/appointment_blocks.php"
             }
         ]
     },
@@ -76,6 +81,13 @@
             "cron_description": "Create appointment blocks until horizon",
             "method": "createAllFutureAppointmentBlocks",
             "cron_frequency": "86400",
+            "cron_max_run_time": "360"
+        },
+        {
+            "cron_name": "pipe_email_alert_times_into_comments",
+            "cron_description": "Scrapes email alert notification times into a comments field",
+            "method": "addEmailAlertsToAllProjectComments",
+            "cron_frequency": "60",
             "cron_max_run_time": "360"
         }
     ]
