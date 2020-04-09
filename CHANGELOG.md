@@ -2,6 +2,20 @@
 All notable changes to the First Responder COVID-19 Testing project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [0.5.0] - 2020-04-09
+### Added
+- Add 'Clone a project into Production' to README (Philip Chase)
+- Add start_date to test site that decides when appointments will begin (Kyle Chesney)
+- Add AUTHORS.md file to recognize those responsible for this software (Kevin Hanson)
+
+### Changed
+- Stop deleting all relevant Entity tables when this module is disabled... (Kyle Chesney)
+- Update project XML with export of production project (Philip Chase)
+- Fix bad open_time values in site data (Philip Chase)
+- Correct enclosing on logic for dynamic SQL field to keep project's tables separate (Kyle Chesney)
+
+
 ## [0.4.1] - 2020-04-07
 ### Changed
 - Correct issue in form test in redcap_save_record (Kyle Chesney)
