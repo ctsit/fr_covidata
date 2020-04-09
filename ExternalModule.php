@@ -184,6 +184,7 @@ class ExternalModule extends AbstractExternalModule {
         $closed_days_line = (isset($closed_days)) ? "AND weekday(date) NOT IN (" . $closed_days . ")" : '';
         $start_date = $data['start_date'];
 
+        // If the start_date is in the past or not set, use today's date
         $start_date = (!empty($start_date) && $start_date > time()) ? strftime('%Y-%m-%d', $start_date) : date('Y-m-d');
 
         $sql = "
@@ -222,10 +223,6 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
             ";
 
         $result = $this->framework->query($sql);
-    }
-
-    function redcap_module_system_disable($version) {
-        EntityDB::dropSchema($this->PREFIX);
     }
 
     function redcap_entity_types() {
