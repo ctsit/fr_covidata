@@ -179,7 +179,7 @@ class ExternalModule extends AbstractExternalModule {
         $close_time = ($data['close_time'] !== '00:00') ? $data['close_time'] : '23:59';
         $horizon_days = $data['horizon_days'];
         $closed_days = $data['closed_days'];
-        $mults_needed = $horizon_days*(60/$minute_interval)*24;
+        $mults_needed = (1 + $horizon_days)*(60/$minute_interval)*24;
         $site_id = $test_site->getId();
         $closed_days_line = (isset($closed_days)) ? "AND weekday(date) NOT IN (" . $closed_days . ")" : '';
         $start_date = $data['start_date'];
@@ -191,7 +191,7 @@ class ExternalModule extends AbstractExternalModule {
 INSERT INTO redcap_entity_fr_appointment (created, updated, site, appointment_block, project_id)
 SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date)), $project_id
             FROM (
-                SELECT (DATE('$start_date') + 1 + INTERVAL c.number*$minute_interval MINUTE) AS date
+                SELECT (DATE('$start_date') + INTERVAL c.number*$minute_interval MINUTE) AS date
                     FROM (SELECT singles + tens + hundreds number FROM 
                         ( SELECT 0 singles
                             UNION ALL SELECT   1 UNION ALL SELECT   2 UNION ALL SELECT   3
