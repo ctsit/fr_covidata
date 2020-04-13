@@ -163,6 +163,7 @@ class ExternalModule extends AbstractExternalModule {
 
 
     function createAllFutureAppointmentBlocks() {
+        return;
         $factory = new EntityFactory();
         $query = $factory->query('test_site');
         $test_sites = $query->execute();
