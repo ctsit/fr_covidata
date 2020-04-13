@@ -2,6 +2,13 @@
 All notable changes to the First Responder COVID-19 Testing project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [0.5.2] - 2020-04-13
+### Changed
+- kill auto appointment generation function (#16) (Kyle Chesney)
+- cutoff scheduling for next day at 3pm instead of 4pm (Kyle Chesney)
+
+
 ## [0.5.1] - 2020-04-10
 ### Changed
 - update dynamic SQL query to disallow repeat appointments from seeing their prior appointments (Kyle Chesney)
