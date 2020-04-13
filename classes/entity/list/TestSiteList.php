@@ -13,7 +13,7 @@ class TestSiteList extends EntityList {
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (isset($_POST['create_all_future_appointment_blocks'])) {
-                $this->module->createAllFutureAppointmentBlocks(True);
+                $this->module->createAllFutureAppointmentBlocks("run anyway");
                 StatusMessageQueue::enqueue('Created future appointment blocks.');
             }
         }
