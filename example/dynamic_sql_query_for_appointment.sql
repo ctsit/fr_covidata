@@ -26,7 +26,7 @@ SELECT a.id, CONCAT(b.site_short_name, ' - ', from_unixtime(a.appointment_block,
             AND project_id = [project-id]
             -- If it is later than 4pm, only show appointments at least 2 days from today
             AND (
-            ( appointment_block > UNIX_TIMESTAMP( DATE( NOW() + INTERVAL IF(HOUR(NOW()) >= 16, 2, 1) DAY ) ) )
+            ( appointment_block > UNIX_TIMESTAMP( DATE( NOW() + INTERVAL IF(HOUR(NOW()) >= 15, 2, 1) DAY ) ) )
             -- unless it's an entry for the same visit for this person, and it's not a survey
             OR (
                 IF([is-survey], 0, 1)
