@@ -162,8 +162,10 @@ class ExternalModule extends AbstractExternalModule {
     }
 
 
-    function createAllFutureAppointmentBlocks() {
-        return;
+    function createAllFutureAppointmentBlocks($override = False) {
+        if (!$override) { // cron will pass no arg by default
+            return;
+        }
         $factory = new EntityFactory();
         $query = $factory->query('test_site');
         $test_sites = $query->execute();
