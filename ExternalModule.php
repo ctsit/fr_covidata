@@ -161,7 +161,6 @@ class ExternalModule extends AbstractExternalModule {
         // fill in dates for $interval at every $min_interval minutes
     }
 
-
     function createAllFutureAppointmentBlocks($override = False) {
         if ($override !== "run anyway") { // cron will pass an array by default
             return;
@@ -170,62 +169,8 @@ class ExternalModule extends AbstractExternalModule {
         $query = $factory->query('test_site');
         $test_sites = $query->execute();
         foreach ($test_sites as $test_site) {
-            $this->createFutureAppointmentBlocks($test_site);
+            $test_site->createFutureAppointmentBlocks();
         }
-    }
-
-    function createFutureAppointmentBlocks($test_site) {
-        $data = $test_site->getData();
-        $project_id = $data['project_id'];
-        $minute_interval = $data['site_appointment_duration'];
-        $open_time = $data['open_time'];
-        $close_time = ($data['close_time'] !== '00:00') ? $data['close_time'] : '23:59';
-        $horizon_days = $data['horizon_days'];
-        $closed_days = $data['closed_days'];
-        $mults_needed = (1 + $horizon_days)*(60/$minute_interval)*24;
-        $site_id = $test_site->getId();
-        $closed_days_line = (isset($closed_days)) ? "AND weekday(date) NOT IN (" . $closed_days . ")" : '';
-        $start_date = $data['start_date'];
-
-        // If the start_date is in the past or not set, use today's date
-        $start_date = (!empty($start_date) && $start_date > time()) ? strftime('%Y-%m-%d', $start_date) : date('Y-m-d');
-
-        $sql = "
-INSERT INTO redcap_entity_fr_appointment (created, updated, site, appointment_block, project_id)
-SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date)), $project_id
-            FROM (
-                SELECT (DATE('$start_date') + INTERVAL c.number*$minute_interval MINUTE) AS date
-                    FROM (SELECT singles + tens + hundreds number FROM 
-                        ( SELECT 0 singles
-                            UNION ALL SELECT   1 UNION ALL SELECT   2 UNION ALL SELECT   3
-                            UNION ALL SELECT   4 UNION ALL SELECT   5 UNION ALL SELECT   6
-                            UNION ALL SELECT   7 UNION ALL SELECT   8 UNION ALL SELECT   9
-                        ) singles JOIN 
-                        (SELECT 0 tens
-                            UNION ALL SELECT  10 UNION ALL SELECT  20 UNION ALL SELECT  30
-                            UNION ALL SELECT  40 UNION ALL SELECT  50 UNION ALL SELECT  60
-                            UNION ALL SELECT  70 UNION ALL SELECT  80 UNION ALL SELECT  90
-                        ) tens  JOIN 
-                        (SELECT 0 hundreds
-                            UNION ALL SELECT  100 UNION ALL SELECT  200 UNION ALL SELECT  300
-                            UNION ALL SELECT  400 UNION ALL SELECT  500 UNION ALL SELECT  600
-                            UNION ALL SELECT  700 UNION ALL SELECT  800 UNION ALL SELECT  900
-                        ) hundreds
-                    ORDER BY number DESC) c 
-                WHERE c.number BETWEEN 0 AND $mults_needed
-            ) dates
-            WHERE date between DATE('$start_date') and CAST( (DATE('$start_date') + INTERVAL (1 + $horizon_days) DAY) AS DATETIME ) " .
-            $closed_days_line . "
-            AND TIME(date) between TIME('$open_time') and TIME('$close_time') - INTERVAL 1 SECOND
-                -- do not create duplicate appointment times at any site
-                AND NOT EXISTS (
-                    SELECT * FROM redcap_entity_fr_appointment WHERE
-                    CONCAT(redcap_entity_fr_appointment.site, redcap_entity_fr_appointment.appointment_block)
-                        = CONCAT($site_id, FLOOR(UNIX_TIMESTAMP(date)))
-                )
-            ";
-
-        $result = $this->framework->query($sql);
     }
 
     function redcap_entity_types() {
@@ -237,6 +182,10 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
             'icon' => 'home_pencil',
             'special_keys' => [
                 'project' => 'project_id',
+            ],
+            'class' => [
+                'path' => 'classes/entity/TestSite.php',
+                'name' => 'FRCOVID\Entity\TestSite'
             ],
             'properties' => [
                 'site_long_name' => [
@@ -351,7 +300,7 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
      *   A keyed array containing settings for the current page.
      */
     protected function setJsSettings($settings) {
-        echo '<script>onCoreClient = ' . json_encode($settings) . ';</script>';
+        echo '<script>FRCOVID = ' . json_encode($settings) . ';</script>';
     }
 
     function sendEmail($email_info) {

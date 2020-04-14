@@ -21,6 +21,7 @@ class TestSiteList extends EntityList {
         parent::renderPageBody();
     }
 
+    /* Temporarily remove this button until it is scoped to within the project it is clicked on
     protected function renderAddButton() {
 
         $btn = RCView::i(['class' => 'fas fa-calendar-alt']);
@@ -33,4 +34,5 @@ class TestSiteList extends EntityList {
         echo RCView::form(['id' => 'generate_all_appointment_blocks', 'method' => 'post'], $btn);
         parent::renderAddButton();
     }
+    */
 }
