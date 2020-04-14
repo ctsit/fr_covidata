@@ -3,6 +3,13 @@ All notable changes to the First Responder COVID-19 Testing project will be docu
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.6.0] - 2020-04-14
+### Changed
+- Update project XML with fresh export of Prod project from 2020-04-14_1644 (Philip Chase)
+- Update README for features in 0.5.0 and 0.5.2 and 0.6.0 (Philip Chase)
+- abstract appointment creation into an Entity object for TestSite (Kyle Chesney)
+
+
 ## [0.5.2] - 2020-04-13
 ### Changed
 - kill auto appointment generation function (#16) (Kyle Chesney)
