@@ -41,21 +41,29 @@ class TestSite extends Entity {
             // mapping of weekday name to integer in MySQL spec
             $dow_map = array('Monday' => 0, 'Tuesday' => 1, 'Wednesday' => 2, 'Thursday' => 3, 'Friday' => 4, 'Saturday' => 5, 'Sunday' => 6);
             $custom_daily = json_decode(json_encode($data['custom_daily_schedule']), True); // stored in DB as nested stdClass objects
-            $custom_days_sql = "";
+            $custom_days_sql = " AND (
+            ";
             foreach($custom_daily as $day => $hours) {
-                $dow_encoding = $dow_map[$day];
+                $dow = $dow_map[$day];
                 $open = $hours['open'];
                 $close = $hours['close'];
                 // TODO: finish and integrate
-                $custom_days_sql .= "OR (
-                            WEEKDAY(date) = $day
+                $custom_days_sql .= "(
+                            WEEKDAY(date) = $dow
                             AND
                             TIME(date) between TIME('$open') AND TIME('$close')
                         )";
+                if ($day !== "Sunday") {
+                    $custom_days_sql .= " OR ";
+                }
             }
-            return;
+            $custom_days_sql .= ")";
+            $days_sql = $custom_days_sql;
         } else {
+        $days_sql = $closed_days_line . "
+            AND TIME(date) between TIME('$open_time') and TIME('$close_time') - INTERVAL 1 SECOND";
         }
+
 
         $sql = "
 INSERT INTO redcap_entity_fr_appointment (created, updated, site, appointment_block, project_id)
@@ -82,8 +90,7 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
                 WHERE c.number BETWEEN 0 AND $mults_needed
             ) dates
             WHERE date between DATE('$start_date') and CAST( (DATE('$start_date') + INTERVAL (1 + $horizon_days) DAY) AS DATETIME ) " .
-            $closed_days_line . "
-            AND TIME(date) between TIME('$open_time') and TIME('$close_time') - INTERVAL 1 SECOND
+            $days_sql . "
                 -- do not create duplicate appointment times at any site
                 AND NOT EXISTS (
                     SELECT * FROM redcap_entity_fr_appointment WHERE
