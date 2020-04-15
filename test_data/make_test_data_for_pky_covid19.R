@@ -9,7 +9,7 @@ source("./R/functions.R")
 n <- 200
 
 # generate a vector of values for each column with a uniform distribution
-record_id <- tibble(record_id = seq(from = 1, to = n))
+record_id <- tibble(record_id = seq(from = 10, to = n))
 
 # Get some names and fake demographic data
 demographic_data <- read_csv("us-500.csv")

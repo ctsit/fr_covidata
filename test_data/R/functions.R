@@ -136,7 +136,7 @@ make_icf_data_pky <- function(record_id, n, demographic_data, event_name) {
     TRUE ~ as.character(NA)
   ))
   icf_child_date <- tibble(icf_child_date = ce_orgconsentdate$ce_orgconsentdate)
-  form_complete <- tibble(informed_consent_complete_complete =rep(2,n))
+  form_complete <- tibble(informed_consent_complete =rep(2,n))
 
 
   # make informed_consent_complete
