@@ -6,10 +6,11 @@ library(lubridate)
 source("./R/functions.R")
 
 # control limits on the test data
+record_start <- 10
 n <- 200
 
 # generate a vector of values for each column with a uniform distribution
-record_id <- tibble(record_id = seq(from = 10, to = n))
+record_id <- tibble(record_id = seq(from = record_start, to = n + record_start-1))
 
 # Get some names and fake demographic data
 demographic_data <- read_csv("us-500.csv")
