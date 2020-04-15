@@ -119,3 +119,90 @@ make_mini_fraction <- function(record_id, fraction, arm, output_file) {
   return(record_id_n)
 }
 
+
+make_icf_data_pky <- function(record_id, n, demographic_data, event_name) {
+  ce_orgconsentdate <- tibble(ce_orgconsentdate = Sys.Date() - sample(1:6, n, replace = T))
+  redcap_event_name <- tibble(redcap_event_name = rep(event_name,n))
+  icf_grade <- tibble(icf_grade = sample(c(0,1,2,3,4,5,6,7,8,9,10,11,12), n, replace = T))
+
+  icf_fingerstick <- tibble(icf_fingerstick = sample(c('BBC', 'CBS', 'IBM', 'YMM', 'IPF', 'DK', 'LMAO'), n, replace = TRUE))
+  icf_age <- tibble(icf_age = icf_grade$icf_grade + 6)
+  icf_lar_name <- tibble(icf_lar_name = case_when(
+    icf_age < 18 ~ sample(c('Eunice Bigelow', 'Pris Chase', 'Joyce Zeitler'), n, replace = TRUE),
+    TRUE ~ as.character(NA)
+  ))
+  icf_lar_relationship <- tibble(icf_lar_relationship = case_when(
+    icf_age < 18 ~ sample(c('Mother', 'God Mother'), n, replace = TRUE),
+    TRUE ~ as.character(NA)
+  ))
+  icf_child_date <- tibble(icf_child_date = ce_orgconsentdate$ce_orgconsentdate)
+  form_complete <- tibble(informed_consent_complete_complete =rep(2,n))
+
+
+  # make informed_consent_complete
+  demo <- demographic_data %>%
+    rename(ce_firstname = first_name,
+           ce_lastname = last_name,
+           icf_email = email) %>%
+    select(starts_with("ce_"))
+
+  form <- bind_cols(record_id,
+                    redcap_event_name,
+                    demo,
+                    icf_grade,
+                    icf_fingerstick,
+                    icf_age,
+                    icf_lar_name,
+                    icf_lar_relationship,
+                    icf_child_date,
+                    ce_orgconsentdate,
+                    form_complete
+  )
+
+  return(form)
+}
+
+
+make_questionnaire_pky <- function(record_id, n, demographic_data, event_name, q_date, icf_age) {
+  # make questionaire
+
+  redcap_event_name <- tibble(redcap_event_name = rep(event_name,n))
+  form_complete <- tibble(pky_coronavirus_covid19_questionnaire_complete =rep(2,n))
+
+  # make required text fields
+  qpk_date <- tibble(qpk_date = q_date)
+  demo <- demographic_data %>%
+    rename(
+      qpk_street_address = address,
+      qpk_city = city,
+      qpk_state = state,
+      qpk_zipcode = zip,
+      qpk_email_address = email,
+      qpk_phone = phone1
+    ) %>%
+    mutate(
+      qpk_contact_name = paste(first_name, last_name),
+      qpk_name_pt = qpk_contact_name
+    ) %>%
+    select(contains("qpk"))
+  patient_dob <- tibble(patient_dob = today()
+                        - dyears(sample(20:65, n, replace = T))
+                        - ddays(sample(1:365, n, replace = T)))
+
+  # make radio fields
+  qpk_gender <- tibble(qpk_gender = sample(1:2, n, replace = T))
+  qpk_school <- tibble(qpk_school = rep(18,n))
+  qpk_patient_age <- tibble(qpk_patient_age = icf_age)
+
+  form <- bind_cols(record_id,
+                    redcap_event_name,
+                    demo,
+                    qpk_date,
+                    qpk_school,
+                    qpk_gender,
+                    qpk_patient_age,
+                    form_complete
+  )
+
+  return(form)
+}
