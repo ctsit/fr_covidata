@@ -5,8 +5,14 @@ $(function() {
 function prettyPrint() {
     let $field = $('#redcap-entity-prop-custom_daily_schedule');
     let ugly = $field.val();
-    let pretty = JSON.stringify(JSON.parse(ugly), undefined, 2);
-    $field.val(pretty);
+    try {
+        let pretty = JSON.stringify(JSON.parse(ugly), undefined, 2);
+        $field.val(pretty);
+    } catch (err) {
+        if (err instanceof SyntaxError) {
+            alert("There is an error in your JSON syntax:\n" + err.message);
+        }
+    }
 }
 
 /*

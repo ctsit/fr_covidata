@@ -24,7 +24,7 @@ class TestSiteForm extends EntityForm {
                 'name' => 'prettify_json',
                 'class' => 'btn btn-primary btn-sm',
                 'onclick' => 'prettyPrint()',
-                ], 'Pretty format JSON'
+                ], 'Check and format JSON'
         );
     }
 
