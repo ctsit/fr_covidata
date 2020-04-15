@@ -6,11 +6,15 @@ use FRCOVID\ExternalModule\ExternalModule;
 use REDCapEntity\Entity;
 
 class TestSite extends Entity {
-    private $module;
+    protected $module;
 
     function __construct($factory, $entity_type, $id = null) {
         parent::__construct($factory, $entity_type, $id);
         $this->module = new \FRCOVID\ExternalModule\ExternalModule();
+    }
+
+    function getModule() {
+        return $this->module;
     }
 
     function create_future_appointments() {
@@ -32,6 +36,26 @@ class TestSite extends Entity {
 
         // If the start_date is in the past or not set, use today's date
         $start_date = (!empty($start_date) && $start_date > time()) ? strftime('%Y-%m-%d', $start_date) : date('Y-m-d');
+
+        if ( $data['use_custom_daily_schedule'] == '1' ) {
+            // mapping of weekday name to integer in MySQL spec
+            $dow_map = array('Monday' => 0, 'Tuesday' => 1, 'Wednesday' => 2, 'Thursday' => 3, 'Friday' => 4, 'Saturday' => 5, 'Sunday' => 6);
+            $custom_daily = json_decode(json_encode($data['custom_daily_schedule']), True); // stored in DB as nested stdClass objects
+            $custom_days_sql = "";
+            foreach($custom_daily as $day => $hours) {
+                $dow_encoding = $dow_map[$day];
+                $open = $hours['open'];
+                $close = $hours['close'];
+                // TODO: finish and integrate
+                $custom_days_sql .= "OR (
+                            WEEKDAY(date) = $day
+                            AND
+                            TIME(date) between TIME('$open') AND TIME('$close')
+                        )";
+            }
+            return;
+        } else {
+        }
 
         $sql = "
 INSERT INTO redcap_entity_fr_appointment (created, updated, site, appointment_block, project_id)

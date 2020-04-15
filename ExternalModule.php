@@ -187,6 +187,10 @@ class ExternalModule extends AbstractExternalModule {
                 'path' => 'classes/entity/TestSite.php',
                 'name' => 'FRCOVID\Entity\TestSite'
             ],
+            'form_class' => [
+                'path' => 'classes/entity/form/TestSiteForm.php',
+                'name' => 'FRCOVID\Entity\TestSiteForm'
+            ],
             'properties' => [
                 'site_long_name' => [
                     'name' => 'Testing Site Full Name',
@@ -237,6 +241,20 @@ class ExternalModule extends AbstractExternalModule {
                 'testing_type' => [
                     'name' => 'Type of testing done at this site',
                     'type' => 'text',
+                ],
+                'use_custom_daily_schedule' => [
+                    // Single day only supported until Entity gets update for multiselect
+                    'name' => 'Use custom daily schedule',
+                    'type' => 'text',
+                    'default' => '0',
+                    'choices' => [
+                        '0' => 'No',
+                        '1' => 'Yes',
+                    ]
+                ],
+                'custom_daily_schedule' => [
+                    'name' => 'Custom week',
+                    'type' => 'json',
                 ],
                 'project_id' => [
                     'name' => 'Project ID',
