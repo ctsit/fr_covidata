@@ -15,15 +15,6 @@ function prettyPrint() {
     }
 }
 
-/*
-function prettyPrint() {
-    // jQuery version doesn't work
-    let ugly = document.getElementById('redcap-entity-prop-custom_daily_schedule').value;
-    let pretty = JSON.stringify(JSON.parse(ugly), undefined, 2);
-    document.getElementById('redcap-entity-prop-custom_daily_schedule').value = pretty;
-}
-*/
-
 function fillIfBlank() {
     let $field = $("#redcap-entity-prop-custom_daily_schedule");
     if ( !$field.val() ) {
