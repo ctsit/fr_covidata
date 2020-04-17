@@ -3,7 +3,7 @@
     "namespace": "FRCOVID\\ExternalModule",
     "description": "Facilitate the scheduling and data management of COVID-19 testing for first responders. See the complete documentation at <a href='https://github.com/ctsit/fr_covidata'>https://github.com/ctsit/fr_covidata</a>",
     "permissions": [
-        "redcap_every_page_top",
+        "redcap_survey_page_top",
         "redcap_module_system_enable",
         "redcap_module_system_disable",
         "redcap_save_record"
@@ -41,6 +41,11 @@
             "name": "Which instrument is used for appointments?",
             "type": "form-list",
             "required": true
+        },
+        {
+            "key": "data_endpoint",
+            "name": "REDCap Webservices url for appointment data: ",
+            "type": "text"
         },
         {
             "key": "repeat_implement",

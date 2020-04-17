@@ -13,7 +13,13 @@ use REDCapEntity\StatusMessageQueue;
 
 class ExternalModule extends AbstractExternalModule {
 
-    function redcap_every_page_top($project_id) {
+    function redcap_survey_page_top($project_id, $record = NULL, $instrument, $event_id, $group_id = NULL, $survey_hash, $response_id = NULL, $repeat_instance = 1 ) {
+        $appointment_form = $this->framework->getProjectSetting('appointment_form');
+        if ($instrument == $appointment_form) {
+            $this->setJsSettings(['data_endpoint' => $this->framework->getProjectSetting('data_endpoint')]);
+            $this->includeJs('js/populate_appointment_table.js');
+            $this->includeCss('css/appointment_table.css');
+        }
     }
 
     function redcap_save_record($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance) {
@@ -281,6 +287,10 @@ class ExternalModule extends AbstractExternalModule {
         ];
 
         return $types;
+    }
+
+    protected function includeCss($path) {
+        echo '<link rel="stylesheet" href="' . $this->getUrl($path) . '">';
     }
 
     /**
