@@ -51,7 +51,7 @@ class TestSite extends Entity {
                 $custom_days_sql .= "(
                             WEEKDAY(date) = $dow
                             AND
-                            TIME(date) between TIME('$open') AND TIME('$close')
+                            TIME(date) between TIME('$open') AND TIME('$close') - INTERVAL 1 SECOND
                         )";
                 if ($day !== "Sunday") {
                     $custom_days_sql .= " OR ";
