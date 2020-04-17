@@ -44,7 +44,7 @@
         },
         {
             "key": "data_endpoint",
-            "name": "REDCap Webservices url for appointment data: ",
+            "name": "REDCap Webservices url for appointment data",
             "type": "text"
         },
         {
