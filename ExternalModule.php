@@ -13,9 +13,10 @@ use REDCapEntity\StatusMessageQueue;
 
 class ExternalModule extends AbstractExternalModule {
 
-    function redcap_survey_page_top($project_id, $record = NULL, $instrument, $event_id, $group_id = NULL, $survey_hash, $response_id = NULL, $repeat_instance = 1 ) {
-        $appointment_form = $this->framework->getProjectSetting('appointment_form');
-        if ($instrument == $appointment_form) {
+
+    function redcap_every_page_top($project_id) {
+        // inject JS for appointment table population
+        if ($project_id) {
             $this->setJsSettings(['data_endpoint' => $this->framework->getProjectSetting('data_endpoint')]);
             $this->includeJs('js/populate_appointment_table.js');
             $this->includeCss('css/appointment_table.css');
