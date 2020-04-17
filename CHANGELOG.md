@@ -3,6 +3,11 @@ All notable changes to the First Responder COVID-19 Testing project will be docu
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.7.0] - 2020-04-17
+### Added
+- use JSON to create a custom daily schedule (Kyle Chesney)
+
+
 ## [0.6.0] - 2020-04-14
 ### Changed
 - Update project XML with fresh export of Prod project from 2020-04-14_1644 (Philip Chase)
