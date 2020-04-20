@@ -70,7 +70,7 @@ INSERT INTO redcap_entity_fr_appointment (created, updated, site, appointment_bl
 SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date)), $project_id
             FROM (
                 SELECT (DATE('$start_date') + INTERVAL c.number*$minute_interval MINUTE) AS date
-                    FROM (SELECT singles + tens + hundreds number FROM 
+                    FROM (SELECT singles + tens + hundreds + thousands number FROM 
                         ( SELECT 0 singles
                             UNION ALL SELECT   1 UNION ALL SELECT   2 UNION ALL SELECT   3
                             UNION ALL SELECT   4 UNION ALL SELECT   5 UNION ALL SELECT   6
@@ -85,7 +85,12 @@ SELECT unix_timestamp(), unix_timestamp(), $site_id, FLOOR(UNIX_TIMESTAMP(date))
                             UNION ALL SELECT  100 UNION ALL SELECT  200 UNION ALL SELECT  300
                             UNION ALL SELECT  400 UNION ALL SELECT  500 UNION ALL SELECT  600
                             UNION ALL SELECT  700 UNION ALL SELECT  800 UNION ALL SELECT  900
-                        ) hundreds
+                        ) hundreds JOIN
+                        (SELECT 0 thousands
+                            UNION ALL SELECT  1000 UNION ALL SELECT  2000 UNION ALL SELECT  3000
+                            UNION ALL SELECT  4000 UNION ALL SELECT  5000 UNION ALL SELECT  6000
+                            UNION ALL SELECT  7000 UNION ALL SELECT  8000 UNION ALL SELECT  9000
+                        ) thousands
                     ORDER BY number DESC) c 
                 WHERE c.number BETWEEN 0 AND $mults_needed
             ) dates
