@@ -22,7 +22,7 @@ This module was created with numerous abstractions to allow it to be reused in o
 To configure and use this module, follow these steps:
 
 1. Create a REDCap project from the file [`First_Responder_COVID19.xml`](example/First_Responder_COVID19.xml)
-1. Update the `appointments` field on the `Appointments Form`, changing it to a Dynamic SQL field and configuring it to auto-complete. Paste the appropriate code from [`example/dynamic_sql_query_for_appointment.sql`](example/dynamic_sql_query_for_appointment.sql)
+1. Update the `appointments` field on the `Appointments Form`, changing it to a Dynamic SQL field and configuring it to auto-complete. Paste the appropriate code from [`example/dynamic_sql_*.sql`](example/)
 1. Enable the FR Covidata module as described above.
 1. Configure the FR Covidata module identify to set `Which location ID is this project for? (0-15)`. This will reduce the risk of errors if one lab is processing specimens from different REDCap projects. Start with 0 and work your way up if you have to deploy multiple production instances of this module.
 1. Configure the FR Covidata module identify to set `Which instrument is used for appointments?` In the included REDCap XML files, the form is named "Appointments".
