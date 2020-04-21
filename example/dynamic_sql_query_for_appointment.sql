@@ -52,7 +52,7 @@ SELECT a.id, CONCAT(b.site_short_name, ' - ', from_unixtime(a.appointment_block,
             AND (
             ( appointment_block > UNIX_TIMESTAMP(
                      -- If it is later than 3pm, only show appointments at least 2 days from today
-                    DATE( NOW() + INTERVAL IF(HOUR(NOW()) >= 15 & WEEKDAY(NOW()) != 6, 2, 1) DAY ) +
+                    DATE( NOW() + INTERVAL IF(HOUR(NOW()) >= 15 AND WEEKDAY(NOW()) != 6, 2, 1) DAY ) +
                     -- if it's Saturday after 3, add an additional day
                     INTERVAL IF(WEEKDAY(NOW()) = 5 AND HOUR(NOW()) >= 15, 1, 0) DAY +
                     -- or if it's Sunday
@@ -72,4 +72,3 @@ SELECT a.id, CONCAT(b.site_short_name, ' - ', from_unixtime(a.appointment_block,
     )
     ORDER BY a.appointment_block
     ;
-
