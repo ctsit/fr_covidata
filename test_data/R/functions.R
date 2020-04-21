@@ -144,7 +144,7 @@ make_icf_data_pky <- function(record_id, n, demographic_data, event_name) {
     rename(ce_firstname = first_name,
            ce_lastname = last_name,
            icf_email = email) %>%
-    select(starts_with("ce_"))
+    select(starts_with("ce_"), icf_email)
 
   form <- bind_cols(record_id,
                     redcap_event_name,
