@@ -28,5 +28,5 @@ SELECT a.id, CONCAT('Tent ', b.site_short_name, ' - ', from_unixtime(a.appointme
         ) as a
     INNER JOIN redcap_entity_test_site as b ON a.site = b.id
     )
-    ORDER BY a.appointment_block
+    ORDER BY a.appointment_block, b.site_short_name
     ;
