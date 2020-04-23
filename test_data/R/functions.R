@@ -167,14 +167,13 @@ make_icf_data_pky <- function(record_id, n, demographic_data, event_name) {
 }
 
 
-make_questionnaire_pky <- function(record_id, n, demographic_data, event_name, q_date, icf_age) {
+make_questionnaire_pky <- function(record_id, n, demographic_data, event_name, icf) {
   # make questionaire
-
   redcap_event_name <- tibble(redcap_event_name = rep(event_name,n))
   form_complete <- tibble(pky_coronavirus_covid19_questionnaire_complete =rep(2,n))
 
   # make required text fields
-  qpk_date <- tibble(qpk_date = q_date)
+  qpk_date <- tibble(qpk_date = icf$ce_orgconsentdate)
   demo <- demographic_data %>%
     rename(
       qpk_street_address = address,
@@ -189,14 +188,11 @@ make_questionnaire_pky <- function(record_id, n, demographic_data, event_name, q
       qpk_name_pt = qpk_contact_name
     ) %>%
     select(contains("qpk"))
-  patient_dob <- tibble(patient_dob = today()
-                        - dyears(sample(20:65, n, replace = T))
-                        - ddays(sample(1:365, n, replace = T)))
 
-  # make radio fields
+# make radio fields
   qpk_gender <- tibble(qpk_gender = sample(1:2, n, replace = T))
   qpk_school <- tibble(qpk_school = rep(18,n))
-  qpk_patient_age <- tibble(qpk_patient_age = icf_age)
+  qpk_patient_age <- tibble(qpk_patient_age = icf$icf_age)
 
   form <- bind_cols(record_id,
                     redcap_event_name,
@@ -206,6 +202,11 @@ make_questionnaire_pky <- function(record_id, n, demographic_data, event_name, q
                     qpk_gender,
                     qpk_patient_age,
                     form_complete
+  ) %>%
+  mutate(qpk_contact_name = case_when(
+         qpk_patient_age >= 18 ~ qpk_contact_name,
+         TRUE ~ icf$icf_lar_name
+    )
   )
 
   return(form)

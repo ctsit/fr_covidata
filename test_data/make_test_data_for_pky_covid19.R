@@ -35,7 +35,7 @@ write_csv(icf, "output/informed_consent_form_pky.csv", na = "")
 str(demographic_data)
 
 # questionnaire
-questionnaire <- make_questionnaire_pky(record_id, n, demographic_data, "baseline_arm_1", icf$ce_orgconsentdate, icf$icf_age)
+questionnaire <- make_questionnaire_pky(record_id, n, demographic_data, "baseline_arm_1", icf)
 write_csv(questionnaire, "output/questionnaire_pky.csv", na = "")
 
 # Make concatenated dataset
