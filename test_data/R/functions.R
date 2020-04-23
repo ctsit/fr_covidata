@@ -127,6 +127,9 @@ make_icf_data_pky <- function(record_id, n, demographic_data, event_name) {
 
   icf_fingerstick <- tibble(icf_fingerstick = sample(c('BBC', 'CBS', 'IBM', 'YMM', 'IPF', 'DK', 'LMAO'), n, replace = TRUE))
   icf_age <- tibble(icf_age = icf_grade$icf_grade + 6)
+  patient_dob <- tibble(patient_dob = today()
+                        - dyears(icf_age$icf_age)
+                        - ddays(sample(1:350, n, replace = T)))
   icf_lar_name <- tibble(icf_lar_name = case_when(
     icf_age < 18 ~ sample(c('Eunice Bigelow', 'Pris Chase', 'Joyce Zeitler'), n, replace = TRUE),
     TRUE ~ as.character(NA)
@@ -152,6 +155,7 @@ make_icf_data_pky <- function(record_id, n, demographic_data, event_name) {
                     icf_grade,
                     icf_fingerstick,
                     icf_age,
+                    patient_dob,
                     icf_lar_name,
                     icf_lar_relationship,
                     icf_child_date,
