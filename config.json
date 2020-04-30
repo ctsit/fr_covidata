@@ -43,6 +43,11 @@
             "required": true
         },
         {
+            "key": "data_endpoint",
+            "name": "REDCap Webservices url for appointment data",
+            "type": "text"
+        },
+        {
             "key": "repeat_implement",
             "name": "Which repeat type is used for appointments?",
             "type": "radio",
