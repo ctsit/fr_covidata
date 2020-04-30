@@ -3,6 +3,12 @@ All notable changes to the First Responder COVID-19 Testing project will be docu
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.9.0] - 2020-04-30
+### Added
+- Create explicit dynamic SQL files for FR and PKY (Philip Chase)
+- add ability to inject dynamic table of info from RC Webservices JS (Kyle Chesney)
+
+
 ## [0.8.0] - 2020-04-21
 ### Added
 - add capacity to support up to 9999 appointment blocks (Kyle Chesney)
