@@ -28,8 +28,9 @@ To configure and use this module, follow these steps:
 1. Configure the FR Covidata module identify to set `Which instrument is used for appointments?` In the included REDCap XML files, the form is named "Appointments".
 1. Configure the FR Covidata module to indicate which repeat type is used for repeats: _Repeating instances_ or _Individual Events_. In the included REDCap XML files, _events_ are used.
 ![](images/module_configuration_for_fr_covid_module.png)
-1. Use a MySQL client to load sites data from [`redcap_entity_test_site_data.sql`](example/redcap_entity_test_site_data.sql). Alternatively, use the `Define Sites` page of this module to enter the data. Be cautious as some portions of the interface of this module have very few guard rails. I.e., your data entry will not be checked. E.g., tiems must be entered in a 4-digit, 24-hour clock format such that 7 a.m. is 0700. The leading zero is critical. The development schedule has not allowed the addition of these tests, nor does it allow for much documentation. As such, the authors advise you to _use the example configuration_ as a starting point.
-1. Adjust the project_ids referenced on those just-loaded sites by editing and running a copy of [`redcap_entity_test_site_update.sql`](example/redcap_entity_test_site_update.sql)
+1. The field _REDCap Webservices url for appointment data_ is an optional feature explained in [Showing Appointment Availability](#showing-appointment-availability)
+1. Use a MySQL client to load sites data from [`redcap_entity_test_site_data.sql`](example/redcap_entity_test_site_data.sql). Alternatively, use the `Define Sites` page of this module to enter the data. Be cautious as some portions of the interface of this module have very few guard rails. I.e., your data entry will not be checked. E.g., items must be entered in a 4-digit, 24-hour clock format such that 7 a.m. is 0700. The leading zero is critical. The development schedule has not allowed the addition of these tests, nor does it allow for much documentation. As such, the authors advise you to _use the example configuration_ as a starting point.
+1. Adjust the `project_id`s referenced on those just-loaded sites by editing and running a copy of [`redcap_entity_test_site_update.sql`](example/redcap_entity_test_site_update.sql)
 1. Access `Define Sites` to make any needed changes to the site definitions.
 1. Generate the initial appointment blocks by accessing `Define Sites` and selecting the sites of interest and clicking `Manually generate new appointments`
 ![](images/define_sites.png)
@@ -69,6 +70,35 @@ The module will define a cron job that runs daily to assure _appointment\_horizo
 
 As of release 0.6.0, the most precise way to make appointment blocks is to set _appointment\_horizon_ days to zero and set _start\_date_ to the precise date for which you want to make appointments. Select the sites that need new appointment blocks and click `Manually generate new appointments`. Repeat this process for each site date that needs new appointment blocks.
 
+## Showing Appointment Availability
+
+A table showing the current number of available appointments can be shown on any survey page after a few steps. Some SQL knowledge is required.  
+![Appointment availabilty table example](images/appointment_table.png)
+
+1. Create a query with [REDCap Webservices](https://github.com/ctsit/redcap_webservices) to deliver the data you wish to display.  
+    example:
+
+    ```sql
+    CONCAT(site_long_name, ' (', site_short_name, ')') AS location,
+        ts.testing_type,
+        COUNT(IF(fra.record_id IS NULL, 1, NULL)) AS available
+            FROM redcap_entity_fr_appointment AS fra
+            INNER join redcap_entity_test_site AS ts ON (fra.site = ts.id)
+            WHERE ts.project_id = [project-id]
+            AND ( fra.appointment_block > UNIX_TIMESTAMP( DATE( NOW() + INTERVAL IF(HOUR(NOW()) >= 16, 2, 1) DAY ) ) )
+            GROUP BY site
+    ```
+
+1. In the Project Level configuration, set the appropriate URL in for **REDCap Webservices url for appointment data** (remember to fill in variables such as `project_id` in the parameters if needed)
+1. Add a descriptive text field to the REDCap survey on any instrument page with the `field_label` containing HTML to create a table with id `appointment_table`:  
+    example:  
+    ```html
+    <table id="appointment_table" class="table table-borderless table-responsive"></table>
+    ```
+
+The table will appear in the descriptive field you set. Rows where any value is `0` will be highlighted in orange.
+
+Further styling may be done with the [REDCap CSS Injector](https://github.com/ctsit/redcap_css_injector) module.
 
 ## Using test data
 
@@ -139,4 +169,3 @@ To clone a development project into a production project, follow the steps below
 1. Disable the Project Overlay Banner module.
 1. Add the Public Survey URL to the public-facing landing page.
 1. You have now completed the project deployment.
-
