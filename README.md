@@ -74,8 +74,10 @@ As of release 0.6.0, the most precise way to make appointment blocks is to set _
 
 A table showing the current number of available appointments can be shown on any survey page after a few steps. Some SQL knowledge is required.  
 ![Appointment availabilty table example](images/appointment_table.png)
+
 1. Create a query with [REDCap Webservices](https://github.com/ctsit/redcap_webservices) to deliver the data you wish to display.  
     example:
+
     ```sql
     CONCAT(site_long_name, ' (', site_short_name, ')') AS location,
         ts.testing_type,
