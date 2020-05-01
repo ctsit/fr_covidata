@@ -88,6 +88,7 @@ A table showing the current number of available appointments can be shown on any
             AND ( fra.appointment_block > UNIX_TIMESTAMP( DATE( NOW() + INTERVAL IF(HOUR(NOW()) >= 16, 2, 1) DAY ) ) )
             GROUP BY site
     ```
+
 1. In the Project Level configuration, set the appropriate URL in for **REDCap Webservices url for appointment data** (remember to fill in variables such as `project_id` in the parameters if needed)
 1. Add a descriptive text field to the REDCap survey on any instrument page with the `field_label` containing HTML to create a table with id `appointment_table`:  
     example:  
