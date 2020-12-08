@@ -1,5 +1,7 @@
+-- REMOVE ALL COMMENTS BEFORE PASTING TO REDCAP
+
 -- for FR-COVID-19
--- using individual events, accounting for Sunday being closed, not allowing appointments for Monday after 3pm Saturday
+-- using individual events, for the cron job generating labels every day at 7pm.
 SELECT a.id, CONCAT(b.site_short_name, ' - ', from_unixtime(a.appointment_block, '%m/%d/%Y %W %h:%i %p')) FROM
     (
         (SELECT * FROM redcap_entity_fr_appointment
@@ -9,12 +11,8 @@ SELECT a.id, CONCAT(b.site_short_name, ' - ', from_unixtime(a.appointment_block,
             AND project_id = [project-id]
             AND (
             ( appointment_block > UNIX_TIMESTAMP(
-                     -- If it is later than 3pm, only show appointments at least 2 days from today
-                    DATE( NOW() + INTERVAL IF(HOUR(NOW()) >= 15 AND WEEKDAY(NOW()) != 6, 2, 1) DAY ) +
-                    -- if it's Saturday after 3, add an additional day
-                    INTERVAL IF(WEEKDAY(NOW()) = 5 AND HOUR(NOW()) >= 15, 1, 0) DAY +
-                    -- or if it's Sunday
-                    INTERVAL IF(WEEKDAY(NOW()) = 6, 1, 0) DAY
+                     -- If it is later than 7pm, only show appointments at least 2 days from today
+                    DATE( NOW() + INTERVAL IF(HOUR(NOW()) >= 19, 2, 1) DAY )
                 )
             )
             -- unless it's an entry for the same visit for this person, and it's not a survey
